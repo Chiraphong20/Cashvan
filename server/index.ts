@@ -504,7 +504,7 @@ app.post('/api/sales', async (req, res) => {
         );
 
         // 4. Update Store Status
-        await connection.execute('UPDATE stores SET status = "SURVEYED" WHERE id = ?', [store_id]);
+        await connection.execute('UPDATE stores SET status = "SUCCESS" WHERE id = ?', [store_id]);
 
         await connection.commit();
         console.log(`✅ [SALES] Successfully recorded sale: ${saleId}`);
