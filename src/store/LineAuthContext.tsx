@@ -34,7 +34,7 @@ export const LineAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         await liff.init({ liffId });
         
         if (!liff.isLoggedIn()) {
-          liff.login();
+          liff.login({ redirectUri: window.location.href });
           return;
         }
 
