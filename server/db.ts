@@ -12,12 +12,18 @@ const dbConfig = {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    connectTimeout: 10000 // 10 seconds timeout
+    connectTimeout: 10000, // 10 seconds timeout
+    timezone: '+07:00'
 };
 
 console.log(`🔌 Initializing database connection for ${dbConfig.host}...`);
 
 const pool = mysql.createPool(dbConfig);
+
+// บังคับให้ฐานข้อมูลใช้ Timezone ประเทศไทย (+07:00) ในทุกๆ Session
+pool.on('connection', (connection) => {
+    connection.query("SET time_zone = '+07:00';");
+});
 
 // Helper function to check if a column exists
 async function columnExists(connection: any, table: string, column: string) {
