@@ -29,7 +29,7 @@ export const LineAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const initLiff = async () => {
       try {
-        const liffId = '2009105092-WldkRhqH'; 
+        const liffId = import.meta.env.VITE_LIFF_ID || '2009853780-z8zTuIji'; 
         
         await liff.init({ liffId });
         
