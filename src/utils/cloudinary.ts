@@ -3,7 +3,7 @@
  * Replace placeholders with your actual Cloudinary credentials
  */
 
-const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL || 'https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload';
+const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL || `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'cashvan_preset';
 
 export const uploadToCloudinary = async (file: File | Blob): Promise<string> => {
