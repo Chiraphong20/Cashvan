@@ -17,13 +17,13 @@ const getDriverMarker = (status: string) => {
   return L.divIcon({
     className: 'bg-transparent border-0',
     html: `
-      <div class="relative flex items-center justify-center">
-        <div class="w-8 h-8 ${isSurveyed ? 'bg-[#10b981]' : 'bg-[#f43f5e]'} rounded-full border-2 border-white shadow-xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95">
-          <span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'FILL' 1">
-            ${isSurveyed ? 'check_circle' : 'location_on'}
-          </span>
-        </div>
-        <div class="absolute -bottom-1 w-2 h-2 ${isSurveyed ? 'bg-[#10b981]' : 'bg-[#f43f5e]'} rotate-45 border-r border-b border-white"></div>
+      <div class="relative flex items-center justify-center w-8 h-8 z-30 transition-transform duration-300 hover:scale-110 active:scale-95">
+        <div class="absolute w-7 h-7 ${isSurveyed ? 'bg-[#10b981]' : 'bg-[#f43f5e]'} shadow-xl border-2 border-white" 
+             style="border-radius: 50% 50% 50% 0; transform: rotate(-45deg);"></div>
+        ${isSurveyed 
+          ? `<span class="material-symbols-outlined text-white text-[14px] z-10" style="font-variation-settings: 'FILL' 1; font-weight: 900; transform: translateY(-1px);">check</span>`
+          : `<div class="absolute w-2.5 h-2.5 bg-white rounded-full z-10 animate-pulse"></div>`
+        }
       </div>
     `,
     iconSize: [32, 32],

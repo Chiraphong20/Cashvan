@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 const navItems = [
   { name: 'หน้าแรก', icon: 'dashboard', path: '/admin' },
   { name: 'Map Overview', icon: 'map', path: '/admin/map' },
+  { name: 'จัดการพนักงาน', icon: 'group', path: '/admin/employees' },
   { name: 'สต็อกสินค้าและคลัง', icon: 'inventory_2', path: '/admin/inventory' },
   { name: 'รายงานยอดขาย', icon: 'analytics', path: '/admin/sales' },
   { name: 'จัดการรายการสินค้า', icon: 'category', path: '/admin/products' },

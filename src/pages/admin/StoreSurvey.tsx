@@ -248,6 +248,7 @@ export default function StoreSurvey() {
                      <th className="px-4 py-5 text-left">ประเภท</th>
                      <th className="px-4 py-5 text-left">พิกัด/พื้นที่</th>
                      <th className="px-4 py-5 text-left">พบร้านวันที่</th>
+                     <th className="px-4 py-5 text-left">ผู้สำรวจ</th>
                      <th className="px-4 py-5 text-center">ลูกค้า</th>
                      <th className="px-8 py-5 text-right">จัดการ</th>
                   </tr>
@@ -285,6 +286,16 @@ export default function StoreSurvey() {
                           ) : (
                             <div className="text-xs font-bold text-slate-400 italic bg-slate-100 inline-block px-2 py-1 rounded-md">ยังไม่พบร้าน</div>
                           )}
+                       </td>
+                       <td className="px-4 py-5">
+                          <div className="flex items-center gap-2">
+                             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                <span className="material-symbols-outlined text-[10px] text-primary">person</span>
+                             </div>
+                             <span className="text-xs font-bold text-slate-700 truncate max-w-[120px]" title={item.created_by || 'ไม่ได้ระบุ'}>
+                                {item.created_by || 'ไม่ได้ระบุ'}
+                             </span>
+                          </div>
                        </td>
                        <td className="px-4 py-5 text-center">
                           <button 

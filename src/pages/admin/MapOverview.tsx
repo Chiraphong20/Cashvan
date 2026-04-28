@@ -26,8 +26,10 @@ const getCustomMarker = (type: string, status: string, isAdminOnly?: boolean) =>
 
   if (isSurveyed) {
     markerHtml = `
-      <div class="relative flex items-center justify-center w-[30px] h-[30px] bg-[#10b981] rounded-full border-[2.5px] border-white ${shadowClass} z-20">
-        <span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'FILL' 1; font-weight: 700;">check</span>
+      <div class="relative flex items-center justify-center w-8 h-8 z-30 group-hover:-translate-y-2 transition-transform duration-300">
+        <div class="absolute w-7 h-7 bg-[#10b981] ${shadowClass} border-2 border-white" 
+             style="border-radius: 50% 50% 50% 0; transform: rotate(-45deg);"></div>
+        <span class="material-symbols-outlined text-white text-[14px] z-10" style="font-variation-settings: 'FILL' 1; font-weight: 900; transform: translateY(-1px);">check</span>
       </div>
     `;
   } else {
