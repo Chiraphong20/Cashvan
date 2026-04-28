@@ -1,0 +1,7 @@
+{
+  "name": "Cashvan System",
+  "description": "A system for delivery drivers/sales reps (Frontend Mobile/Web App) and a Backend Admin Panel.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

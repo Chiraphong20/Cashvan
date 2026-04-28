@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Navigator - Driver Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Prompt:wght@400;500;600;700&amp;family=Sarabun:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#121c28",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-tertiary-fixed": "#2a1700",
+                    "secondary-container": "#6cf8bb",
+                    "secondary": "#006c49",
+                    "primary-container": "#1a56db",
+                    "background": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "outline-variant": "#c3c5d7",
+                    "on-primary-fixed": "#00174d",
+                    "surface-container-highest": "#d9e3f4",
+                    "primary": "#003fb1",
+                    "on-background": "#121c28",
+                    "surface-tint": "#1353d8",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#895600",
+                    "primary-fixed": "#dbe1ff",
+                    "on-primary-fixed-variant": "#003dab",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#ffddb8",
+                    "surface-container-low": "#eef4ff",
+                    "surface": "#f8f9ff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-container": "#ffd6a8",
+                    "surface-dim": "#d1dbec",
+                    "secondary-fixed": "#6ffbbe",
+                    "surface-container-high": "#dfe9fa",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface-container": "#e5eeff",
+                    "primary-fixed-dim": "#b5c4ff",
+                    "on-surface-variant": "#434654",
+                    "outline": "#737686",
+                    "on-secondary-fixed": "#002113",
+                    "inverse-primary": "#b5c4ff",
+                    "error": "#ba1a1a",
+                    "tertiary": "#694100",
+                    "on-secondary-container": "#00714d",
+                    "on-primary-container": "#d4dcff",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#d9e3f4",
+                    "inverse-surface": "#27313e",
+                    "surface-bright": "#f8f9ff",
+                    "secondary-fixed-dim": "#4edea3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans", "Prompt"],
+                    "body": ["Inter", "Sarabun"],
+                    "label": ["Inter", "Sarabun"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', 'Sarabun', sans-serif; }
+        h1, h2, h3 { font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased overflow-hidden h-screen flex flex-col">
+<!-- Top Navigation Bar (Shared Component) -->
+<header class="fixed top-0 w-full z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl flex justify-between items-center px-6 py-3 h-16 shadow-sm dark:shadow-none">
+<div class="flex items-center gap-3">
+<span class="text-lg font-bold text-blue-900 dark:text-blue-100 font-headline">ระะบบจัดการ Cashvan</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional headshot of a thai delivery driver smiling wearing a blue uniform outdoor daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcDaJwUXAU2ADxIgwgiMIZUxaQTjgN4yTdSlj3YLPMKJgEIbqdN6hyNnW5u11a1r2MBHGqWiR-b6rTKUC8su_jd2DRE4tAaU3pmkKgBxg3Wim4bZT291b846qmFRFopaDHP7ZlOj5KUBxrSN0ypCXyUtoeBcXDcwGFxtdbvuMnTF-KGeKqsk_8twxMCjeA_1DhWHFQb36gomQh4MNLKYCklVOwsFtz4awKzfrfFau4OZazZ9riFlGrnqE-ToKDTIrdpJ334ypE6noj"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas: Full Screen Map -->
+<main class="relative flex-grow">
+<!-- Map Background -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="stylized minimalist city map of nakhon ratchasima with soft blue and grey tones high detail urban planning style" data-location="Nakhon Ratchasima" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLKBuxBtQK4iIHV8op1sQWoqhd5LT_wPedhp90MnlMhD_mvzcX4jolWBUEwfi9kJFsc8Yzyws1g_4uqXGbdLRYXA6nmKBosbmoK6g_zNKPrWrpqosjAPeIWWcNyIsI4EEdt1YkJsCAtH7JJQVXge7r6IAtM3qQR2VZ0Jrw1gPDuzW103lOImkX9z7FJ6CYAv-_qjwrDDpGTxiT7ykFHlQl3lu4_xNwTqL2y84hq5oR5v-Vkp7g6EhDbVaRuo2C3fobB0gzMItsItSF"/>
+<!-- Map Overlay Gradients for UI clarity -->
+<div class="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-white/30"></div>
+</div>
+<!-- GPS Status Indicator (Floating) -->
+<div class="absolute top-20 left-6 z-10">
+<div class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+<div class="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
+<span class="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase">GPS: Accuracy &lt; 100m</span>
+</div>
+</div>
+<!-- Current Location Marker -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+<div class="relative flex items-center justify-center">
+<div class="absolute w-24 h-24 bg-primary/20 rounded-full animate-ping"></div>
+<div class="w-8 h-8 bg-primary border-4 border-white rounded-full shadow-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xs" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+</div>
+</div>
+<!-- Floating Action Buttons (Contextual FABs) -->
+<div class="absolute right-6 bottom-40 z-30 flex flex-col gap-3">
+<button class="flex items-center gap-2 bg-surface-container-lowest text-primary px-5 py-3 rounded-full shadow-xl hover:bg-primary hover:text-white transition-all duration-300 group">
+<span class="material-symbols-outlined text-xl">add_location</span>
+<span class="font-headline font-bold text-sm">เพิ่มร้านใหม่</span>
+</button>
+<button class="flex items-center gap-3 bg-gradient-to-r from-primary to-primary-container text-white px-6 py-4 rounded-full shadow-[0_8px_32px_rgba(0,63,177,0.3)] hover:scale-105 active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-headline font-extrabold text-base">เช็คอินร้านค้า</span>
+</button>
+</div>
+<!-- Nearby Stores Overlay (Bottom Sheet Pattern) -->
+<div class="absolute bottom-0 left-0 w-full z-20">
+<div class="bg-white/95 backdrop-blur-2xl rounded-t-[2.5rem] shadow-[0_-12px_40px_rgba(18,28,40,0.1)] px-6 pt-4 pb-24 max-h-[353px] overflow-y-auto">
+<div class="flex justify-center mb-6">
+<div class="w-12 h-1.5 bg-surface-container-highest rounded-full"></div>
+</div>
+<div class="flex justify-between items-center mb-6">
+<div>
+<h2 class="text-xl font-headline font-extrabold text-on-surface">ร้านค้าในพื้นที่</h2>
+<p class="text-sm text-on-surface-variant">พบ 3 ร้านค้าภายในรัศมี 500ม.</p>
+</div>
+<button class="p-2 bg-surface-container-low rounded-full">
+<span class="material-symbols-outlined text-primary">filter_list</span>
+</button>
+</div>
+<!-- Stores Grid/List (Editorial Precision) -->
+<div class="space-y-4">
+<!-- Store Item 1 -->
+<div class="p-4 bg-surface-container-lowest rounded-full border-l-4 border-secondary flex items-center justify-between group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-secondary-container/30 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="exterior of a small modern thai convenience store at street level bright daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsAumPBuFizWV9UPuiZ18-iTbjGFE0iaOC0zqbwVXPFww2pOCWHMQuy3TrWJc_6Y882TRPo9EKfElcg6d0_PrpvoFHfSUR_3GiEyZjEF3g7m73BGhP2_yDb7GAigtB-B6SmgVFtGTO52chdnLlMxaruyVnBfAJ3OhApVL_wGDeI96kK0u2RSGq6VZZKzItz8UnQCW24XvWCvoufv8dyUDBWXZHuosiQG2WehXnp7VgSXut0L7d_aueaIOWj6Ljnjzz-caTzlDVi9J4"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">ร้านป้าสมนึก มินิมาร์ท</h3>
+<p class="text-xs font-medium text-secondary">240ม. • พร้อมส่ง</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<!-- Store Item 2 -->
+<div class="p-4 bg-surface-container-lowest rounded-full border-l-4 border-tertiary flex items-center justify-between group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="glass front local pharmacy storefront thailand clean aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWumwwARo-MVpCU0PvM3o0CoCfW2W5GQJPFvf9oS-bjr6vSqv38oX8S4u0sY9WiqeIIqNYJ4dc8FrcXcdjOmCFMJAxl7E-ey_5jIXBPQZF-3O2rWmjHQp0cbpkdUVgRI13zzyB2AKFeFai2SoOpldCSJKxY8shhATqWLXybHouhorYyKn9zH6--NeIT_-hkEq2i0YXSgaiTTO-g9C7Ogk-NG0TSvSyBVChsik3a59chbh0mjKp7k1jdQ1bd1TrOnCVVTz00dDvXLxq"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">โอสถทวีคูณ (โคราช)</h3>
+<p class="text-xs font-medium text-tertiary">380ม. • ยอดค้างชำระ</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<!-- Store Item 3 -->
+<div class="p-4 bg-surface-container-lowest rounded-full border-l-4 border-outline flex items-center justify-between group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="cozy local grocery store interior with wooden shelves bright soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoOZfPqPO_DZKMHdfJ-KwhoPTioqVVYHu2iNOI2RL2AwJrioyBEcyuPKXhxNrAlela-4iKbX1NboiLuLGwV6nczMqq3c6X2-Lt6HATND1LAU5Udf3jaLapcrml9yp471spoWhpq_8BuA_bSGhfpHdUc_5VB__3vTF7UKcsqsJvu-b7w8aYPtk0qDQZq_9Z8yIbgqwsOOyJuE4PZwkanuIivmJ_A1CnbcJlhopxCH6QcepJT0auZqXjmmuKYC9bgH34pmNs0IdTFU5Y"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">ร้านชำเจ้ดา</h3>
+<p class="text-xs font-medium text-on-surface-variant">450ม. • ยังไม่ได้เช็คอิน</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-end px-4 pb-6 pt-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-t-[2rem] z-50 border-t border-slate-100 dark:border-slate-800 shadow-[0_-8px_24px_rgba(18,28,40,0.06)]">
+<!-- Home Tab (Active) -->
+<a class="flex flex-col items-center justify-center bg-blue-600 dark:bg-blue-500 text-white rounded-2xl px-6 py-2.5 scale-110 -translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">หน้าแรก</span>
+</a>
+<!-- Check-in Tab -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-blue-600 dark:hover:text-blue-400 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">เช็คอิน</span>
+</a>
+<!-- Map Tab -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-blue-600 dark:hover:text-blue-400 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">แผนที่</span>
+</a>
+<!-- Profile Tab -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-blue-600 dark:hover:text-blue-400 active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">โปรไฟล์</span>
+</a>
+</nav>
+</body></html>

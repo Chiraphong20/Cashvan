@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Prompt:wght@400;500;600;700&amp;family=Sarabun:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', 'Sarabun', sans-serif;
+        }
+        h1, h2, h3, .brand-font {
+            font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#121c28",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-tertiary-fixed": "#2a1700",
+                        "secondary-container": "#6cf8bb",
+                        "secondary": "#006c49",
+                        "primary-container": "#1a56db",
+                        "background": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "outline-variant": "#c3c5d7",
+                        "on-primary-fixed": "#00174d",
+                        "surface-container-highest": "#d9e3f4",
+                        "primary": "#003fb1",
+                        "on-background": "#121c28",
+                        "surface-tint": "#1353d8",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#895600",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary-fixed-variant": "#003dab",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffddb8",
+                        "surface-container-low": "#eef4ff",
+                        "surface": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#ffd6a8",
+                        "surface-dim": "#d1dbec",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface-container-high": "#dfe9fa",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "surface-container": "#e5eeff",
+                        "primary-fixed-dim": "#b5c4ff",
+                        "on-surface-variant": "#434654",
+                        "outline": "#737686",
+                        "on-secondary-fixed": "#002113",
+                        "inverse-primary": "#b5c4ff",
+                        "error": "#ba1a1a",
+                        "tertiary": "#694100",
+                        "on-secondary-container": "#00714d",
+                        "on-primary-container": "#d4dcff",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#d9e3f4",
+                        "inverse-surface": "#27313e",
+                        "surface-bright": "#f8f9ff",
+                        "secondary-fixed-dim": "#4edea3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-6 py-3 h-16 max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="p-2 -ml-2 hover:bg-surface-container rounded-full transition-colors md:hidden">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold text-blue-900 dark:text-blue-100 font-['Plus_Jakarta_Sans','Prompt']">ระบะจัดการ Cashvan</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex bg-surface-container rounded-full px-4 py-1.5 items-center gap-2">
+<span class="material-symbols-outlined text-outline text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48" placeholder="ค้นหาร้านค้า..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-700 dark:text-blue-400 cursor-pointer hover:opacity-80 transition-opacity" data-icon="notifications">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden">
+<img alt="รูปโปรไฟล์ผู้ใช้งาน" data-alt="professional portrait of a delivery manager in a clean uniform, warm natural lighting, blurred office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxKv44JrDQZgb3eZYbUvvdkryEDkg_y4JeVo5VY0Nh38D0zeAeELMK61pE52s_eOgeaOu2V44VRBdB9kcXQbuFch9Aa3C8ecW53YzYoVsgWDsW9cgBLQ9J-2-my_hZFE8caLiIMN1HMFpERFGJF8jq2nVgHaRd2kOucX4gkSR8whYQ44KyhYPHM-ljm2dDLFkkdWZT-VAzOWHUe7ZQM04_kgXr_hxX79eMNnG3khmsxbCWEL4Jf9cPWLq4KMKGtyW8MOd_xVITnqFh"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-20 pb-28 px-4 max-w-2xl mx-auto space-y-6">
+<!-- Accuracy Header Card -->
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-sm border-l-4 border-tertiary">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="signal_cellular_alt_2_bar">signal_cellular_alt_2_bar</span>
+<h3 class="font-bold text-sm text-on-surface-variant font-['Plus_Jakarta_Sans','Prompt']">GPS Accuracy: Low</h3>
+</div>
+<span class="text-xs font-bold bg-error-container text-on-error-container px-2 py-0.5 rounded-full">32 Meters</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">ระบบต้องการความแม่นยำต่ำกว่า 10 เมตรเพื่อบันทึกข้อมูล กรุณาขยับไปที่โล่งแจ้ง</p>
+</section>
+<!-- Store Details Form -->
+<section class="space-y-4">
+<div class="flex items-center gap-2 px-1">
+<span class="material-symbols-outlined text-primary" data-icon="storefront">storefront</span>
+<h2 class="font-bold text-lg font-['Plus_Jakarta_Sans','Prompt']">ข้อมูลร้านค้า</h2>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-6 space-y-5">
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1">ชื่อร้านค้า</label>
+<input class="w-full bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary/20 py-3 px-4 font-medium text-on-surface" type="text" value="ร้านเจริญพร การค้า"/>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1">หมวดหมู่ร้านค้า</label>
+<select class="w-full bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary/20 py-3 px-4 font-medium text-on-surface appearance-none">
+<option>ร้านขายของชำ (Grocery)</option>
+<option>ร้านอาหาร (Restaurant)</option>
+<option>มินิมาร์ท (Mini Mart)</option>
+</select>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider px-1">ที่อยู่ปัจจุบัน (GPS)</label>
+<div class="flex gap-2">
+<div class="flex-1 bg-surface-container-highest rounded-xl p-3 text-sm text-on-surface-variant">
+                            148 ถ.มิตรภาพ ต.ในเมือง อ.เมือง นครราชสีมา 30000
+                        </div>
+<button class="bg-surface-container-highest p-3 rounded-xl hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="my_location">my_location</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Map Selection -->
+<section class="space-y-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="map">map</span>
+<h2 class="font-bold text-lg font-['Plus_Jakarta_Sans','Prompt']">ตำแหน่งบนแผนที่</h2>
+</div>
+<button class="text-xs font-bold text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span> ปรับตำแหน่ง
+                </button>
+</div>
+<div class="relative h-48 rounded-xl overflow-hidden shadow-sm group">
+<div class="absolute inset-0 bg-slate-200 animate-pulse"></div>
+<img alt="แผนที่แสดงตำแหน่งร้านค้า" class="w-full h-full object-cover relative z-10" data-alt="simplified map interface showing a street grid of a Thai city with a prominent blue location pin marker" data-location="Nakhon Ratchasima" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwCr8Os584mLCWkI54eRUyLWwNPxTT2IiPCX1i0z-psk7SDmPgF-Ndm-cxmELSR8xkpyJVzH5BpSHQnir8Pls4EsFpH3ZGPiqjDe6IU4ef5JTFPMtz8iHyIGGvxBDXu_HiMsahVCYjzGKpM-bT1uKqGPWsmxS3DryY7WTt-OB8bEy9YrpXHPIQ0Tw_y2OTm8i0EBJX_HthhT-V6RhSVHFGvkcsbIWIxAZ-IXfgNuCZeJ0_nml_zK5uo0aBi7R5mNlu--BQbAANfigd"/>
+<div class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+<div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center animate-ping"></div>
+<span class="material-symbols-outlined text-primary text-4xl absolute drop-shadow-md" data-icon="location_on" data-weight="fill" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<div class="absolute bottom-3 right-3 z-30 flex flex-col gap-2">
+<button class="bg-white p-2 rounded-lg shadow-md hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="add">add</span>
+</button>
+<button class="bg-white p-2 rounded-lg shadow-md hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="remove">remove</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Photo Section -->
+<section class="space-y-4">
+<div class="flex items-center gap-2 px-1">
+<span class="material-symbols-outlined text-primary" data-icon="add_a_photo">add_a_photo</span>
+<h2 class="font-bold text-lg font-['Plus_Jakarta_Sans','Prompt']">รูปถ่ายร้านค้า</h2>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+<!-- Slot 1: Filled -->
+<div class="aspect-square rounded-xl overflow-hidden relative group">
+<img alt="หน้าร้านค้า" class="w-full h-full object-cover" data-alt="wide shot of a traditional Thai grocery storefront with colorful displays of products and hanging snacks, bright daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF2EeTpRwrrsLN277VVeRd2hol11WZTcsia2bh0FeTIP62ugdY1M-vncXjczXJ-mQDPcjZhvuZrB-p3nCvVaWwf0XiTTpqZ0_rAjBXUKnpCBUW7sUtBjhV9yTe3kOvZt0vkZ2IOZ6YeNhTdwLrUqqWaEirLdD38Y7RKFPdeE-xIxlnPaRylNQPHPacSIp8PW-6a4EVv5jNOBRA8bhYUmZgIFPoUkAGMrQ8-p0lav5mG26O5nCfRZz1j4sDiJshg6kprFhoFpWVhEdd"/>
+<button class="absolute top-2 right-2 bg-error/90 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+<div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+<p class="text-[10px] text-white font-medium">หน้าร้าน (Front)</p>
+</div>
+</div>
+<!-- Slot 2: Upload Action -->
+<button class="aspect-square rounded-xl bg-surface-container-highest flex flex-col items-center justify-center gap-2 border-2 border-dashed border-outline-variant hover:border-primary/50 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary-container" data-icon="upload_file">upload_file</span>
+<span class="text-[11px] font-bold text-on-surface-variant">สินค้าบนเชลฟ์</span>
+</button>
+<!-- Slot 3: Upload Action -->
+<button class="aspect-square rounded-xl bg-surface-container-highest flex flex-col items-center justify-center gap-2 border-2 border-dashed border-outline-variant hover:border-primary/50 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary-container" data-icon="add_photo_alternate">add_photo_alternate</span>
+<span class="text-[11px] font-bold text-on-surface-variant">ป้ายชื่อร้าน</span>
+</button>
+<!-- Slot 4 & 5 (Desktop only for balance) -->
+<button class="hidden md:flex aspect-square rounded-xl bg-surface-container-highest flex-col items-center justify-center gap-2 border-2 border-dashed border-outline-variant hover:border-primary/50 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined text-primary-container" data-icon="add_photo_alternate">add_photo_alternate</span>
+<span class="text-[11px] font-bold text-on-surface-variant">รูปอื่นๆ</span>
+</button>
+</div>
+</section>
+<!-- Form Actions -->
+<section class="flex flex-col gap-3 pt-4">
+<button class="w-full py-4 rounded-xl bg-slate-300 text-slate-500 font-bold text-lg flex items-center justify-center gap-2 cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+                บันทึกข้อมูล (Accuracy Low)
+            </button>
+<p class="text-center text-[11px] text-on-surface-variant font-medium">ข้อมูลจะถูกส่งไปยังระบบส่วนกลางทันทีหลังบันทึก</p>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-end px-4 pb-6 pt-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border-t border-slate-100 dark:border-slate-800 shadow-[0_-8px_24px_rgba(18,28,40,0.06)] z-50">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-blue-600 dark:hover:text-blue-400 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">หน้าแรก</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-blue-600 dark:bg-blue-500 text-white rounded-2xl px-6 py-2.5 scale-110 -translate-y-2 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">เช็คอิน</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-blue-600 dark:hover:text-blue-400 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">แผนที่</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-4 py-2 hover:text-blue-600 dark:hover:text-blue-400 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide">โปรไฟล์</span>
+</a>
+</nav>
+</body></html>

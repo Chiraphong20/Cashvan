@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Navigator - Map Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Prompt:wght@400;500;600;700&amp;family=Sarabun:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "inverse-on-surface": "#eaf1ff",
+                "on-primary": "#ffffff",
+                "on-surface": "#121c28",
+                "on-tertiary-fixed-variant": "#653e00",
+                "on-tertiary-fixed": "#2a1700",
+                "secondary-container": "#6cf8bb",
+                "secondary": "#006c49",
+                "primary-container": "#1a56db",
+                "background": "#f8f9ff",
+                "on-secondary-fixed-variant": "#005236",
+                "outline-variant": "#c3c5d7",
+                "on-primary-fixed": "#00174d",
+                "surface-container-highest": "#d9e3f4",
+                "primary": "#003fb1",
+                "on-background": "#121c28",
+                "surface-tint": "#1353d8",
+                "surface-container-lowest": "#ffffff",
+                "tertiary-container": "#895600",
+                "primary-fixed": "#dbe1ff",
+                "on-primary-fixed-variant": "#003dab",
+                "error-container": "#ffdad6",
+                "on-error": "#ffffff",
+                "on-error-container": "#93000a",
+                "tertiary-fixed": "#ffddb8",
+                "surface-container-low": "#eef4ff",
+                "surface": "#f8f9ff",
+                "on-secondary": "#ffffff",
+                "on-tertiary-container": "#ffd6a8",
+                "surface-dim": "#d1dbec",
+                "secondary-fixed": "#6ffbbe",
+                "surface-container-high": "#dfe9fa",
+                "tertiary-fixed-dim": "#ffb95f",
+                "surface-container": "#e5eeff",
+                "primary-fixed-dim": "#b5c4ff",
+                "on-surface-variant": "#434654",
+                "outline": "#737686",
+                "on-secondary-fixed": "#002113",
+                "inverse-primary": "#b5c4ff",
+                "error": "#ba1a1a",
+                "tertiary": "#694100",
+                "on-secondary-container": "#00714d",
+                "on-primary-container": "#d4dcff",
+                "on-tertiary": "#ffffff",
+                "surface-variant": "#d9e3f4",
+                "inverse-surface": "#27313e",
+                "surface-bright": "#f8f9ff",
+                "secondary-fixed-dim": "#4edea3"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "fontFamily": {
+                "headline": ["Plus Jakarta Sans", "Prompt"],
+                "body": ["Inter", "Sarabun"],
+                "label": ["Inter", "Sarabun"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', 'Sarabun', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm flex justify-between items-center px-6 py-3 h-16">
+<div class="flex items-center gap-4">
+<span class="text-lg font-bold text-blue-900 dark:text-blue-100">ระบบจัดการ Cashvan</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="pl-10 pr-4 py-1.5 rounded-full border-none bg-surface-container-highest focus:ring-2 focus:ring-primary text-sm w-64" placeholder="ค้นหาร้านค้า..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:opacity-80 transition-opacity text-blue-700 dark:text-blue-400">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 hover:opacity-80 transition-opacity text-blue-700 dark:text-blue-400">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-slate-50 dark:bg-slate-900 z-30 hidden md:flex flex-col p-6 space-y-2">
+<div class="mb-8 mt-12">
+<h2 class="text-xl font-black tracking-tighter text-blue-800 dark:text-blue-300">Precision Navigator</h2>
+<p class="text-xs text-outline font-medium">เขตพื้นที่นครราชสีมา</p>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50 transition-all duration-200 font-bold text-sm tracking-tight rounded-xl" href="#">
+<span class="material-symbols-outlined">dashboard</span> หน้าหลัก
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-blue-700 font-extrabold border-r-4 border-blue-700 bg-blue-50/50 transition-all duration-200 font-bold text-sm tracking-tight rounded-l-xl" href="#">
+<span class="material-symbols-outlined">map</span> แผนที่ขนส่ง
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50 transition-all duration-200 font-bold text-sm tracking-tight rounded-xl" href="#">
+<span class="material-symbols-outlined">local_shipping</span> พนักงานขับรถ
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50 transition-all duration-200 font-bold text-sm tracking-tight rounded-xl" href="#">
+<span class="material-symbols-outlined">storefront</span> ร้านค้าและผลสำรวจ
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50 transition-all duration-200 font-bold text-sm tracking-tight rounded-xl" href="#">
+<span class="material-symbols-outlined">analytics</span> รายงานสรุป
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-blue-50 transition-all duration-200 font-bold text-sm tracking-tight rounded-xl" href="#">
+<span class="material-symbols-outlined">settings</span> ตั้งค่าระบบ
+            </a>
+</nav>
+<div class="mt-auto pt-6">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+<span class="material-symbols-outlined">add</span> เพิ่มเส้นทางขนส่ง
+            </button>
+</div>
+</aside>
+<!-- Main Content Area (Map Canvas) -->
+<main class="md:pl-64 pt-16 min-h-screen relative">
+<!-- Interactive Map Background -->
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-surface-container-highest relative overflow-hidden">
+<!-- Mock Map Image -->
+<img alt="Detailed topographical map of Nakhon Ratchasima showing urban clusters and rural routes" class="w-full h-full object-cover opacity-60 mix-blend-multiply" data-location="Nakhon Ratchasima, Thailand" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD47JdJUmDglGoXXSVe0dv4f5oFFcRN9KDWQCIslbheqe6FtuUP5r62y8AhSKPOp0aH1Ia862XwwAmkGnS_thDBzElYGDDKaQcH9ARcki6MMEIW1pikFWHjlv3LE8heYkn5Vrcx1m-g9sqffyhuBC0E23BEwoK-M4vrg0GI8TPZrC0-KWTeVkou-IM-1wyJVyKhRvcirfplaSdZthAJF4FHFlZ2nOGyvblUYU8D3n89OsxFrx_G2JD7UjsmRYVAWZsCqP7bYOVZFGH6"/>
+<!-- Map UI Elements (Simulated) -->
+<div class="absolute inset-0 p-8 flex items-center justify-center pointer-events-none">
+<!-- Cluster Marker -->
+<div class="absolute top-[30%] left-[45%] flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 backdrop-blur-md border border-primary pointer-events-auto cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-xl shadow-primary/40">
+                            124
+                        </div>
+</div>
+<!-- Target Marker (Blue) -->
+<div class="absolute top-[50%] left-[30%] flex flex-col items-center pointer-events-auto cursor-pointer group">
+<div class="bg-surface-container-lowest px-2 py-1 rounded-full text-[10px] font-bold mb-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">7-11 จอหอ</div>
+<span class="material-symbols-outlined text-primary text-4xl drop-shadow-lg" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<!-- Surveyed Marker (Green) -->
+<div class="absolute top-[40%] left-[60%] flex flex-col items-center pointer-events-auto cursor-pointer group">
+<div class="bg-surface-container-lowest px-2 py-1 rounded-full text-[10px] font-bold mb-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">ซีเจ มอร์ โคราช</div>
+<span class="material-symbols-outlined text-secondary text-4xl drop-shadow-lg" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<!-- Surveyed Marker (Green) -->
+<div class="absolute top-[65%] left-[55%] flex flex-col items-center pointer-events-auto cursor-pointer group">
+<div class="bg-surface-container-lowest px-2 py-1 rounded-full text-[10px] font-bold mb-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">โลตัส มิตรภาพ</div>
+<span class="material-symbols-outlined text-secondary text-4xl drop-shadow-lg" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating UI: Filter Panel -->
+<div class="absolute top-6 left-6 z-10 w-80 max-h-[calc(100vh-120px)] overflow-hidden">
+<div class="bg-surface-container-high/80 backdrop-blur-xl rounded-full p-6 shadow-[0_8px_24px_rgba(18,28,40,0.06)] border-none">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-primary font-bold text-lg flex items-center gap-2">
+<span class="material-symbols-outlined">filter_list</span> ตัวกรองข้อมูล
+                    </h3>
+<button class="text-xs text-primary font-bold hover:underline">ล้างทั้งหมด</button>
+</div>
+<div class="space-y-5">
+<!-- District Selection -->
+<div>
+<label class="block text-[11px] font-bold text-on-surface-variant tracking-wider mb-2 uppercase">อำเภอ</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-xl text-sm py-2.5 px-4 focus:ring-2 focus:ring-primary shadow-sm">
+<option>เมืองนครราชสีมา</option>
+<option>ปากช่อง</option>
+<option>สีคิ้ว</option>
+<option>ด่านขุนทด</option>
+</select>
+</div>
+<!-- Sub-district Selection -->
+<div>
+<label class="block text-[11px] font-bold text-on-surface-variant tracking-wider mb-2 uppercase">ตำบล</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-xl text-sm py-2.5 px-4 focus:ring-2 focus:ring-primary shadow-sm">
+<option>ในเมือง</option>
+<option>จอหอ</option>
+<option>หัวทะเล</option>
+<option>บ้านเกาะ</option>
+</select>
+</div>
+<!-- Status Selection -->
+<div>
+<label class="block text-[11px] font-bold text-on-surface-variant tracking-wider mb-2 uppercase">สถานะการสำรวจ</label>
+<div class="grid grid-cols-2 gap-2">
+<button class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold bg-secondary text-white shadow-md">
+<span class="material-symbols-outlined text-sm">check_circle</span> สำรวจแล้ว
+                            </button>
+<button class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-primary-fixed">
+<span class="material-symbols-outlined text-sm">pending</span> รอดำเนินการ
+                            </button>
+</div>
+</div>
+<!-- Driver Selection -->
+<div>
+<label class="block text-[11px] font-bold text-on-surface-variant tracking-wider mb-2 uppercase">พนักงานขับรถ</label>
+<div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+<label class="flex items-center gap-3 p-2 bg-surface-container-lowest/50 rounded-lg cursor-pointer hover:bg-white transition-colors">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-[10px] font-bold">สม</div>
+<span class="text-xs font-medium">สมชาย ใจดี</span>
+</div>
+</label>
+<label class="flex items-center gap-3 p-2 bg-surface-container-lowest/50 rounded-lg cursor-pointer hover:bg-white transition-colors">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-[10px] font-bold">วิ</div>
+<span class="text-xs font-medium">วิรัช ขยันมานะ</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating UI: Stats Overlay -->
+<div class="absolute top-6 right-6 z-10 flex flex-col gap-4">
+<div class="bg-surface-container-high/80 backdrop-blur-xl rounded-full px-6 py-4 shadow-sm flex items-center gap-6 border-none">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">ทั้งหมด</span>
+<span class="text-2xl font-black text-primary">1,248</span>
+</div>
+<div class="w-px h-8 bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-secondary tracking-widest uppercase">สำเร็จแล้ว</span>
+<span class="text-2xl font-black text-secondary">854</span>
+</div>
+<div class="w-px h-8 bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-tertiary tracking-widest uppercase">กำลังดำเนินการ</span>
+<span class="text-2xl font-black text-tertiary">394</span>
+</div>
+</div>
+<!-- Legends -->
+<div class="bg-white/60 backdrop-blur-lg rounded-full p-3 shadow-sm border border-white/40 self-end">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 px-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="text-[11px] font-bold text-on-surface">สำรวจแล้ว (Surveyed)</span>
+</div>
+<div class="flex items-center gap-2 px-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-[11px] font-bold text-on-surface">เป้าหมาย (Target)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Map Controls -->
+<div class="absolute bottom-10 right-6 z-10 flex flex-col gap-2">
+<button class="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center hover:bg-surface-container transition-colors text-primary">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center hover:bg-surface-container transition-colors text-primary border-t border-surface-container">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<button class="w-12 h-12 mt-2 bg-primary text-white rounded-xl shadow-lg flex items-center justify-center hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">my_location</span>
+</button>
+</div>
+<!-- FAB for Mobile (Usually hidden on desktop but included for context) -->
+<div class="md:hidden fixed bottom-24 right-6 z-50">
+<button class="w-14 h-14 bg-gradient-to-tr from-primary to-primary-container text-white rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-end px-4 pb-6 pt-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border-t border-slate-100 dark:border-slate-800 z-50">
+<a class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-blue-600 transition-all font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined">home</span> หน้าแรก
+        </a>
+<a class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-blue-600 transition-all font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined">location_on</span> เช็คอิน
+        </a>
+<a class="flex flex-col items-center justify-center bg-blue-600 text-white rounded-2xl px-6 py-2.5 scale-110 -translate-y-2 transition-all font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined">explore</span> แผนที่
+        </a>
+<a class="flex flex-col items-center justify-center text-slate-400 px-4 py-2 hover:text-blue-600 transition-all font-['Inter','Sarabun'] text-[11px] font-medium tracking-wide" href="#">
+<span class="material-symbols-outlined">person</span> โปรไฟล์
+        </a>
+</nav>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1dbec;
+            border-radius: 10px;
+        }
+    </style>
+</body></html>
