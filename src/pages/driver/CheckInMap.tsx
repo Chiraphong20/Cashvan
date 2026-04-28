@@ -193,12 +193,23 @@ export default function CheckInMap() {
               <div className="p-1 min-w-[120px]">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{store.type}</p>
                 <h4 className="font-bold text-sm text-on-surface leading-tight mb-3">{store.name}</h4>
-                <a 
-                  href={isSurveyed ? `/driver/sales?storeId=${store.id}` : `/driver/check-in?storeId=${store.id}`}
-                  className={`block w-full text-white text-center py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all ${isSurveyed ? 'bg-primary shadow-primary/20' : 'bg-red-500 shadow-red-500/20'}`}
-                >
-                  {isSurveyed ? 'เปิดเมนูขาย' : 'เข้าไปสำรวจร้าน'}
-                </a>
+                <div className="flex flex-col gap-2">
+                  <a 
+                    href={isSurveyed ? `/driver/sales?storeId=${store.id}` : `/driver/check-in?storeId=${store.id}`}
+                    className={`block w-full text-white text-center py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all ${isSurveyed ? 'bg-primary shadow-primary/20' : 'bg-red-500 shadow-red-500/20'}`}
+                  >
+                    {isSurveyed ? 'เปิดเมนูขาย' : 'เข้าไปสำรวจร้าน'}
+                  </a>
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${store.lat},${store.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center gap-1 text-blue-600 bg-blue-50 text-center py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all border border-blue-100"
+                  >
+                    <span className="material-symbols-outlined text-xs">navigation</span>
+                    นำทาง
+                  </a>
+                </div>
               </div>
             </Popup>
           </Marker>
