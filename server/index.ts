@@ -3,6 +3,7 @@ import cors from 'cors';
 import { db, initDB } from './db';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const port = 3001;
@@ -750,6 +751,15 @@ app.delete('/api/survey-targets/:id', async (req, res) => {
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message });
     }
+});
+
+// Setup static file serving for Production (Render)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use(express.static(path.join(__dirname, '../dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 // Start Server after Bootstrap
