@@ -1,90 +1,111 @@
-# ระบบ Cashvan & Survey Management - Workflow Documentation
+# กระบวนการทำงานของระบบ (System Workflows)
 
-เอกสารนี้บรรยายขั้นตอนการทำงาน (Flow) ของฟีเจอร์หลักในระบบ เพื่อให้เห็นภาพรวมการทำงานระหว่าง Admin และ Driver
-
----
-
-## 1. การจัดการทีมและสถานะงาน (Daily Work Dashboard)
-ฟีเจอร์สำหรับ Admin ในการควบคุมภาพรวมประจำวัน
-
-```mermaid
-graph TD
-    A[เริ่มวันทำงาน] --> B{พนักงานออนไลน์?}
-    B -- ไม่ --> C[แสดงสถานะ OFFLINE ใน Tracking]
-    B -- ใช่ --> D[แสดงสถานะ ONLINE พร้อมสีประจำตัว]
-    D --> E[กำหนดพื้นที่ทำงาน / Assigned Zone]
-    E --> F[Driver รับทราบพื้นที่ในหน้าหลัก]
-    F --> G[เริ่มลุยตลาด]
-```
-
-**ขั้นตอนการทำงาน:**
-1. **Status Monitoring:** Admin เข้าหน้า Fleet Tracking เพื่อดูลูกบอลสี (Green/Grey) แทนสถานะพนักงาน
-2. **Territory Sync:** Admin ระบุ Zone ที่ต้องการให้พนักงานเข้าพื้นที่ในวันนั้น (เช่น เมือง, ปากช่อง)
-3. **Real-time Awareness:** ระบบเปลี่ยนจากการติดตาม GPS ตลอดเวลา มาเป็นการรายงาน "ความคืบหน้า" (Progress) ของร้านค้าที่สำรวจแล้วแทน
+เอกสารส่วนนี้อธิบาย Flow การทำงานหลักๆ ของระบบ Wae Jer Logistic ตั้งแต่เริ่มวันทำงาน ไปจนถึงการเติมสต็อกและการตรวจสอบข้อมูลโดยแอดมิน
 
 ---
 
-## 2. การจัดการสต็อกรถ (Van Stock Management)
-กระบวนการเคลื่อนย้ายสินค้าจากคลังใหญ่ไปสู่รถแต่ละคัน
+## 1. การเติมสต็อกเข้าสู่รถ (Van Refill Workflow)
+ก่อนที่พนักงานขับรถจะออกเดินทาง แอดมินต้องทำการโอนย้ายสินค้าจากคลังหลัก (Master) เข้าสู่รถ (Van)
 
 ```mermaid
-graph LR
-    A[Master Stock] -- Admin Transfer --> B[Van Item Slots]
-    B --> C{Driver Check}
-    C -- ดูผ่านมือถือ --> D[หน้า Van Stock]
-    D -- ยขายสินค้า --> E[สต็อกในรถลดลงอัตโนมัติ]
-```
+sequenceDiagram
+    actor Admin
+    participant Frontend as Admin Dashboard
+    participant Backend as API Server
+    participant DB as MySQL Database
 
-**ขั้นตอนการทำงาน:**
-1. **Stock In:** Admin เข้าหน้า Inventory เลือกสินค้าและจำนวนที่ต้องการส่งมอบให้ Driver
-2. **Driver Verification:** Driver เปิดเมนู **Van Stock** บนมือถือเพื่อตรวจสอบว่าสินค้าที่รับมา "ตรง" กับในระบบหรือไม่
-3. **Availability:** สินค้าที่อยู่ใน Van Stock จะเป็นตัวกำหนดว่าในหน้า **Digital Catalog** ของ Driver คนนั้นจะขายอะไรได้บ้าง
-
----
-
-## 3. การเช็คอินและสำรวจร้านค้า (Store Survey & Check-in)
-*High-fidelity Mobile-first Workflow*
-
-```mermaid
-graph TD
-    A[Driver ถึงหน้าร้าน] --> B{ร้านเดิมในระบบ?}
-    B -- ใช่ --> C[เลือกหมุดร้านเดิม]
-    B -- ไม่ --> D[กดปุ่ม + เพิ่มร้านใหม่]
-    C & D --> E[หน้า Check-in]
-    E --> F[ปรับตำแหน่งหมุดให้ตรงเป้า]
-    F --> G[กรอกข้อมูล ชื่อร้าน/ที่อยู่]
-    G --> H[ถ่ายรูป 3 ใบ บังคับ]
-    H --> I[กดบันทึกข้อมูล]
-    I --> J[สถานะเปลี่ยนเป็น SURVEYED ทันที]
-```
-
-**สิ่งที่ระบบบังคับ (Validation Rules):**
-- **พิกัด GPS:** ต้องระบุตำแหน่งร้านค้าที่แน่นอน
-- **รูปภาพ (3 รูป):** บังคับถ่าย หน้าร้าน, ภายในร้าน, และชั้นวางสินค้า
-- **สถานะ:** ร้านที่ Check-in สำเร็จจะเปลี่ยนยอดสะสมใน Dashboard ของ Admin ทันที
-
----
-
-## 4. แคตตาล็อกสินค้าและการขาย (Digital Catalog & Sales)
-กระบวนการนำเสนอสินค้าและบันทึกยอดขาย
-
-```mermaid
-graph LR
-    A[เปิดเครื่องมือ] --> B[Digital Catalog]
-    B --> C[แชร์หน้าจอให้ร้านดู]
-    C --> D[เลือกสินค้าใส่ตะกร้า]
-    D --> E[ยืนยันการขาย]
-    E --> F[หักสต็อกรถ + เก็บ Visit History]
+    Admin->>Frontend: เข้าเมนู "สต็อกสินค้าและคลัง" (Inventory)
+    Admin->>Frontend: เลือก "เติมของให้รถ (Refill)"
+    Frontend->>Backend: GET /api/inventory?type=master
+    Backend-->>Frontend: ส่งรายการสินค้าในคลังหลัก
+    Admin->>Frontend: เลือกสินค้า จำนวน และ เลือกรถเป้าหมาย (Van)
+    Admin->>Frontend: กดบันทึก (Confirm Refill)
+    Frontend->>Backend: POST /api/inventory/refill (product_id, qty, vehicle_id)
+    Backend->>DB: ลดจำนวนสต็อก Master
+    Backend->>DB: เพิ่มจำนวนสต็อก Van
+    Backend->>DB: บันทึกลง stock_transactions
+    Backend-->>Frontend: ส่งสถานะ Success
+    Frontend-->>Admin: แสดงข้อความยืนยันการทำรายการ
 ```
 
 ---
 
-## 5. การติดตามผลงาน (Visit History & Reports)
-การตรวจสอบย้อนหลังสำหรับหน่วยงานบริหาร
+## 2. การลงพื้นที่และการสำรวจร้านค้า (Check-in & Survey Workflow)
+กระบวนการที่พนักงานขับรถใช้เมื่อเดินทางไปถึงร้านค้าเป้าหมาย
 
-*   **Visit History:** เก็บ Log ทุกครั้งที่มีการ Check-in (พร้อมรูปภาพและพิกัดแผนที่)
-*   **Sales Report:** สรุปยอดขายรายวัน/รายเดือน แยกตามรายชื่อพนักงาน
-*   **Survey Report:** สรุปจำนวนร้านค้าใหม่ที่ถูกเพิ่มเข้ามาในระบบโดย Driver
+```mermaid
+sequenceDiagram
+    actor Driver
+    participant LIFF as LINE LIFF (Auth)
+    participant FE as Driver Web App
+    participant BE as API Server
+    participant DB as MySQL Database
+
+    Driver->>LIFF: เปิดหน้าแอปผ่าน LINE
+    LIFF-->>FE: ส่งข้อมูล Profile (line_user_id)
+    FE->>BE: ตรวจสอบพนักงาน (Login)
+    BE-->>FE: ส่งข้อมูลพนักงาน (Driver Info)
+    
+    Driver->>FE: เข้าเมนู "แผนที่ร้านค้า (CheckInMap)"
+    FE->>BE: GET /api/stores
+    BE-->>FE: ส่งพิกัดร้านค้าทั้งหมด
+    
+    Driver->>FE: เลือกจุดบนแผนที่และกด "Check-in"
+    FE->>FE: ดึง GPS (Geolocation API) เพื่อตรวจสอบระยะ
+    Driver->>FE: กรอกข้อมูลสถานะร้าน ถ่ายภาพ (อัปโหลด)
+    Driver->>FE: กดบันทึก (Submit Survey)
+    
+    FE->>BE: POST /api/visits
+    BE->>DB: บันทึกข้อมูลการเข้าเยี่ยม (visits table)
+    BE-->>FE: ส่งสถานะ Success
+```
 
 ---
-*เอกสารฉบับนี้อัปเดตล่าสุด: 21 เมษายน 2569*
+
+## 3. การสร้างออเดอร์และการขายสินค้า (Sales Workflow)
+เมื่อพนักงานอยู่หน้าร้านและทำการเสนอขายสินค้า
+
+```mermaid
+sequenceDiagram
+    actor Driver
+    participant FE as Driver Web App
+    participant BE as API Server
+    participant DB as MySQL Database
+
+    Driver->>FE: เปิด "รายการสินค้า (Digital Catalog)"
+    FE->>BE: GET /api/inventory?type=van&location_id={vehicle_id}
+    BE-->>FE: ส่งรายการสต็อกที่มีอยู่บนรถ
+    
+    Driver->>FE: เลือกสินค้าและจำนวน ใส่ตะกร้า
+    Driver->>FE: ยืนยันการสั่งซื้อ
+    FE->>BE: POST /api/sales
+    
+    Note right of BE: Transaction Start
+    BE->>DB: Insert in `sales` table (Total Amount)
+    BE->>DB: Insert in `sale_items` table (Items detail)
+    BE->>DB: Update `inventory` (Deduct from Van Stock)
+    Note right of BE: Transaction Commit
+    
+    BE-->>FE: ส่งใบเสร็จหรือผลการทำงาน Success
+```
+
+---
+
+## 4. การดูภาพรวมและพิกัดพนักงาน (Fleet Tracking Workflow)
+กระบวนการของแอดมินในการตรวจสอบพนักงานบนแผนที่
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant FE as Admin Dashboard
+    participant BE as API Server
+    participant DB as MySQL Database
+
+    Admin->>FE: เข้าเมนู "Map Overview / Fleet Tracking"
+    FE->>BE: GET /api/stores (ดึงร้านค้า)
+    FE->>BE: GET /api/visits/today (ดึงประวัติเยี่ยมร้านของวันนี้)
+    BE-->>FE: ส่งข้อมูลทั้งหมด
+    
+    FE->>FE: Render พิกัดแผนที่ (Leaflet) 
+    Note over FE: แสดงหมุดสีเขียวสำหรับร้านที่เช็คอินแล้ว<br/>และสีเทาสำหรับร้านที่ยังไม่ไป
+```
