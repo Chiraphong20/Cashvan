@@ -206,6 +206,15 @@ export default function MapOverview() {
                   >
                     ดูรายละเอียด
                   </button>
+                  <a 
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${store.lat},${store.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-blue-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase mt-1.5 shadow-lg shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">directions</span>
+                    นำเส้นทาง
+                  </a>
                 </div>
               </Popup>
             </Marker>
@@ -374,8 +383,23 @@ export default function MapOverview() {
 
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                   <button className="bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all">แก้ไขข้อมูล</button>
+                <div className="space-y-3 pt-4">
+                   <div className="grid grid-cols-2 gap-3">
+                      <button className="bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                        <span className="material-symbols-outlined text-sm">edit</span>
+                        แก้ไขข้อมูล
+                      </button>
+                      <a 
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStore.lat},${selectedStore.lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-sm">directions</span>
+                        นำเส้นทาง
+                      </a>
+                   </div>
+
                    {(() => {
                       const hasSales = sales.some(s => s.store_id === selectedStore.id);
                       const saleCount = sales.filter(s => s.store_id === selectedStore.id).length;
@@ -384,8 +408,9 @@ export default function MapOverview() {
                         return (
                           <button 
                            disabled
-                           className="bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] cursor-not-allowed"
+                           className="w-full bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] cursor-not-allowed flex items-center justify-center gap-2"
                           >
+                            <span className="material-symbols-outlined text-sm">history</span>
                             ไม่มีประวัติขาย
                           </button>
                         );
@@ -394,8 +419,9 @@ export default function MapOverview() {
                       return (
                         <button 
                          onClick={() => setShowSalesHistory(true)}
-                         className="bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-slate-900/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                         className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-slate-900/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
                         >
+                          <span className="material-symbols-outlined text-sm">receipt_long</span>
                           ดูประวัติขาย
                           <span className="bg-white/20 px-2 py-0.5 rounded-full text-[9px]">{saleCount} บิล</span>
                         </button>
