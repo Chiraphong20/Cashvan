@@ -49,6 +49,7 @@ interface StoreContextType {
   updateProduct: (id: number, updates: any) => Promise<void>;
   deleteProduct: (id: number) => Promise<void>;
   fetchInventory: (locationId: string) => Promise<void>;
+  updateInventory: (productId: number, locationId: string, quantity: number) => Promise<void>;
   fetchProductsAndCategories: () => Promise<void>;
   fetchStoreById: (id: string) => Promise<Store | null>;
 }
@@ -403,6 +404,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
+  const updateInventory = async (product_id: number, location_id: string, quantity: number) => {
+    try {
+      const response = await fetch('/api/inventory', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id, location_id, quantity })
+      });
+      if (response.ok) {
+        await fetchInventory(location_id);
+      }
+    } catch (error) {
+      console.error('Error updating inventory:', error);
+    }
+  };
+
   return (
     <StoreContext.Provider value={{
       stores, sales, inventories, visits, zones, products, categories, drivers, surveyTargets,
@@ -410,7 +426,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addStore, updateStore, deleteStore, addDriver, updateDriver, deleteDriver,
       recordSale, deleteSale, addVisit, transferStock, closeDay, returnStock,
       isCollapsed, setIsCollapsed, addSurveyTarget, deleteSurveyTarget,
-      addProduct, updateProduct, deleteProduct, fetchInventory, fetchProductsAndCategories,
+      addProduct, updateProduct, deleteProduct, fetchInventory, updateInventory, fetchProductsAndCategories,
       fetchStoreById
     }}>
       {children}

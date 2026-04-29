@@ -59,6 +59,17 @@ export default function Inventory() {
     );
   }, [products, searchQuery]);
 
+  // Floating Refill Control Bar
+  const [editingInventory, setEditingInventory] = useState<{product_id: number, name: string, current: number, location: string} | null>(null);
+  const { updateInventory } = useStoreDB();
+  const [newQuantity, setNewQuantity] = useState(0);
+
+  const handleUpdateStock = async () => {
+    if (!editingInventory) return;
+    await updateInventory(editingInventory.product_id, editingInventory.location, newQuantity);
+    setEditingInventory(null);
+  };
+
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700 pb-32">
       <div className="flex justify-between items-end">
@@ -126,8 +137,19 @@ export default function Inventory() {
                                <span className="text-[9px] font-black text-slate-400">SKU: {p?.sku}</span>
                             </div>
                          </div>
-                         <div className="text-right">
-                            <p className="text-2xl font-black text-slate-900">{inv.quantity}</p>
+                         <div className="flex items-center gap-4">
+                            <div className="text-right">
+                               <p className="text-2xl font-black text-slate-900">{inv.quantity}</p>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                setEditingInventory({ product_id: inv.product_id, name: p?.name || '', current: inv.quantity, location: selectedVehicle });
+                                setNewQuantity(inv.quantity);
+                              }}
+                              className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary transition-all opacity-0 group-hover:opacity-100 shadow-sm"
+                            >
+                               <span className="material-symbols-outlined text-sm">edit</span>
+                            </button>
                          </div>
                       </div>
                     );
@@ -177,12 +199,14 @@ export default function Inventory() {
                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Product Info</th>
                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</th>
                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Master Stock</th>
+                       <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
                     </tr>
                  </thead>
                  <tbody>
                     {filteredMasterProducts.map(p => {
                        const cat = categories.find(c => c.id === p.category_id);
                        const isSelected = selectedProductIds.includes(p.id);
+                       const masterStock = inventories['MASTER']?.find(inv => inv.product_id === p.id)?.quantity || 0;
                        return (
                           <tr key={p.id} className={`border-b border-slate-50 transition-all ${isSelected ? 'bg-primary/5' : 'hover:bg-slate-50/50'}`}>
                              <td className="px-8 py-6">
@@ -210,13 +234,77 @@ export default function Inventory() {
                                 </span>
                              </td>
                              <td className="px-8 py-6">
-                                <p className="font-black text-slate-800">500 <small className="text-slate-400">ชิ้น</small></p>
+                                <p className="font-black text-slate-800">{masterStock} <small className="text-slate-400">ชิ้น</small></p>
+                             </td>
+                             <td className="px-8 py-6">
+                                <button 
+                                  onClick={() => {
+                                    setEditingInventory({ product_id: p.id, name: p.name, current: masterStock, location: '' });
+                                    setNewQuantity(masterStock);
+                                  }}
+                                  className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg shadow-slate-900/10 hover:-translate-y-0.5 transition-all"
+                                >
+                                  <span className="material-symbols-outlined text-sm">add</span>
+                                  เติมสต็อกหลัก
+                                </button>
                              </td>
                           </tr>
                        );
                     })}
                  </tbody>
               </table>
+           </div>
+        </div>
+      )}
+
+      {/* Editing Stock Modal */}
+      {editingInventory && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[3000] flex items-center justify-center p-4">
+           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+              <div className="flex justify-between items-center mb-6">
+                 <div>
+                    <h3 className="text-xl font-black text-slate-800 leading-none">ปรับปรุงจำนวนสต็อก</h3>
+                    <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">
+                       {editingInventory.location ? `รถทะเบียน: ${vehicles.find(v => v.id === editingInventory.location)?.plate_number}` : 'สต็อกส่วนกลาง (MASTER)'}
+                    </p>
+                 </div>
+                 <button onClick={() => setEditingInventory(null)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
+                    <span className="material-symbols-outlined">close</span>
+                 </button>
+              </div>
+
+              <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 mb-6">
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">สินค้า</p>
+                 <p className="text-lg font-black text-slate-800">{editingInventory.name}</p>
+                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-dashed border-slate-200">
+                    <span className="text-xs font-bold text-slate-500">จำนวนปัจจุบัน</span>
+                    <span className="text-xl font-black text-slate-900">{editingInventory.current} ชิ้น</span>
+                 </div>
+              </div>
+
+              <div className="space-y-2 mb-8">
+                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">ระบุจำนวนใหม่</label>
+                 <div className="relative">
+                    <input 
+                      type="number" 
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-6 text-3xl font-black outline-none focus:border-primary/30 transition-all"
+                      value={newQuantity}
+                      onChange={e => setNewQuantity(parseInt(e.target.value) || 0)}
+                      autoFocus
+                    />
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-2">
+                       <button onClick={() => setNewQuantity(q => q + 10)} className="w-8 h-8 bg-white border border-slate-200 rounded-lg text-xs font-black hover:bg-slate-50 active:scale-95">+</button>
+                       <button onClick={() => setNewQuantity(q => Math.max(0, q - 10))} className="w-8 h-8 bg-white border border-slate-200 rounded-lg text-xs font-black hover:bg-slate-50 active:scale-95">-</button>
+                    </div>
+                 </div>
+              </div>
+
+              <button 
+                onClick={handleUpdateStock}
+                className="w-full bg-primary text-white py-5 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all active:scale-95"
+              >
+                 ยืนยันการแก้ไขสต็อก
+              </button>
            </div>
         </div>
       )}

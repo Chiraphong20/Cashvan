@@ -422,6 +422,31 @@ app.get('/api/inventory', async (req, res) => {
     }
 });
 
+app.put('/api/inventory', async (req, res) => {
+    const { product_id, location_id, quantity, location_type } = req.body;
+    try {
+        const [existing] = await db.query(
+            'SELECT id FROM inventory WHERE product_id = ? AND location_id = ?', 
+            [product_id, location_id || '']
+        ) as any;
+
+        if (existing.length > 0) {
+            await db.execute(
+                'UPDATE inventory SET quantity = ? WHERE id = ?',
+                [quantity, existing[0].id]
+            );
+        } else {
+            await db.execute(
+                'INSERT INTO inventory (product_id, quantity, location_type, location_id) VALUES (?, ?, ?, ?)',
+                [product_id, quantity, location_type || (location_id ? 'VEHICLE' : 'MASTER'), location_id || '']
+            );
+        }
+        res.json({ status: 'success' });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
 // Sales & Order Recording
 app.delete('/api/sales/:id', async (req, res) => {
     const saleId = req.params.id;
