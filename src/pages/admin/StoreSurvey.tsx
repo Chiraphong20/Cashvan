@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStoreDB } from '../../store/StoreContext';
 import { KORAT_SUBDISTRICTS } from '../../constants/locations';
+import ProgressBarLoader from '../../components/ui/ProgressBarLoader';
 import { mockDistricts, mockSubDistricts } from '../../store/mockData';
 import L from 'leaflet';
 
@@ -12,6 +13,7 @@ export default function StoreSurvey() {
   const [districtFilter, setDistrictFilter] = useState('');
   const [subDistrictFilter, setSubDistrictFilter] = useState('');
   const [driverFilter, setDriverFilter] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStore, setEditingStore] = useState<any>(null);
@@ -70,6 +72,9 @@ export default function StoreSurvey() {
   const handleSaveStore = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
+    if (!data.get('name')) return;
+    
+    setSaving(true);
     const isCustomer = data.get('is_customer') === 'true';
     const payload = {
       name: data.get('name') as string,
@@ -85,12 +90,16 @@ export default function StoreSurvey() {
       status: editingStore.id ? editingStore.status : 'SUCCESS'
     };
 
-    if (editingStore.id) {
-      await updateStore(editingStore.id, payload);
-    } else {
-      await addStore(payload);
+    try {
+      if (editingStore.id) {
+        await updateStore(editingStore.id, payload);
+      } else {
+        await addStore(payload);
+      }
+    } finally {
+      setSaving(false);
+      setIsModalOpen(false);
     }
-    setIsModalOpen(false);
   };
 
   // Table Data Filtering
@@ -119,7 +128,16 @@ export default function StoreSurvey() {
   }, [districtFilter]);
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500 font-body">
+    <div className="p-8 space-y-8 animate-in fade-in duration-500 font-body relative">
+      {/* Saving Overlay */}
+      {saving && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[10000] flex items-center justify-center p-8 animate-in fade-in duration-300">
+           <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-white/20 w-full max-w-sm">
+              <ProgressBarLoader text="กำลังบันทึกข้อมูลร้านค้า" subtext="กรุณารอสักครู่ขณะระบบกำลังอัปเดตฐานข้อมูล" />
+           </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>

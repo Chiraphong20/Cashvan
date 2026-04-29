@@ -415,25 +415,8 @@ export default function CheckInPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-right-4 duration-500 pb-20 bg-slate-50 min-h-screen relative">
-      {/* Saving Loading Popup */}
-      {saving && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 sm:p-0">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"></div>
-          <div className="bg-white rounded-[2.5rem] p-10 flex flex-col items-center gap-6 shadow-2xl relative z-10 animate-in zoom-in-95 duration-300 max-w-xs w-full">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-slate-100"></div>
-              <div className="absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="material-symbols-outlined text-primary text-2xl">cloud_upload</span>
-              </div>
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-black text-slate-800 tracking-tighter mb-2">กำลังบันทึกข้อมูล...</h3>
-              <p className="text-sm text-slate-500 font-medium">กรุณารอสักครู่ ระบบกำลังอัปโหลดพิกัดและรูปภาพของคุณ</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Saving Loading Popup handled by Percentage Overlay below */}
+
 
       {/* Mobile-First Header */}
       <div className="sticky top-0 z-[1000] bg-white/80 backdrop-blur-xl border-b border-slate-100 px-6 py-4 flex items-center justify-between">
@@ -783,24 +766,42 @@ export default function CheckInPage() {
 
       {/* Saving Percentage Overlay */}
       {saving && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center p-8 animate-in fade-in duration-300">
-          <div className="w-full max-w-sm bg-white p-8 rounded-[2rem] shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
-            <div className="w-20 h-20 mb-6 bg-primary/10 text-primary rounded-full flex items-center justify-center">
-              <span className="material-symbols-outlined text-4xl animate-spin">data_usage</span>
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[9999] flex flex-col items-center justify-center p-8 animate-in fade-in duration-300">
+          <div className="w-full max-w-sm bg-white p-10 rounded-[3rem] shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-500 border border-white/20">
+            <div className="w-20 h-20 mb-6 bg-primary/10 text-primary rounded-3xl flex items-center justify-center relative overflow-hidden">
+               <div className="absolute inset-0 bg-primary/10 animate-pulse"></div>
+               <span className="material-symbols-outlined text-4xl relative z-10 font-variation-fill">cloud_upload</span>
             </div>
-            <h3 className="text-xl font-black text-slate-800 mb-2">กำลังบันทึกข้อมูล...</h3>
-            <p className="text-xs font-bold text-slate-400 mb-6">{saveStatusText}</p>
+            <h3 className="text-2xl font-black text-slate-800 tracking-tighter mb-2">กำลังบันทึกข้อมูลร้าน</h3>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8">{saveStatusText}</p>
             
-            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden relative">
-              <div 
-                className="absolute inset-y-0 left-0 bg-primary transition-all duration-300 ease-out" 
-                style={{ width: `${saveProgress}%` }}
-              ></div>
+            <div className="w-full space-y-3">
+              <div className="flex justify-between items-end">
+                <span className="text-[10px] font-black text-primary uppercase tracking-widest">Progress</span>
+                <span className="text-xl font-black text-primary font-mono">{saveProgress}%</span>
+              </div>
+              <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden p-1 shadow-inner">
+                <div 
+                  className="h-full bg-primary rounded-full transition-all duration-500 ease-out relative overflow-hidden" 
+                  style={{ width: `${saveProgress}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" style={{ transform: 'translateX(-100%)' }}></div>
+                </div>
+              </div>
             </div>
-            <div className="mt-3 text-sm font-black text-primary">{saveProgress}%</div>
+
+            <p className="mt-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+              กรุณาอย่าปิดหน้าจอนี้จนกว่าจะเสร็จสิ้น
+            </p>
           </div>
         </div>
       )}
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+      `}} />
     </div>
   );
 }
