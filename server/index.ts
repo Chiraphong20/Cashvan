@@ -820,6 +820,57 @@ app.delete('/api/survey-targets/:id', async (req, res) => {
     }
 });
 
+// Admin Auth & Profile
+app.post('/api/admin/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const [admins] = await db.query('SELECT * FROM admins WHERE username = ?', [username]) as any;
+        if (admins.length === 0) return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+        
+        const crypto = await import('crypto');
+        const hashedPwd = crypto.createHash('sha256').update(password).digest('hex');
+        
+        if (admins[0].password !== hashedPwd) {
+            return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+        }
+        
+        // Return without password
+        const { password: _, ...adminData } = admins[0];
+        res.json({ status: 'success', admin: adminData, token: `fake-jwt-token-${admins[0].id}` });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+app.get('/api/admin/profile', async (req, res) => {
+    const { id } = req.query;
+    try {
+        const [admins] = await db.query('SELECT id, username, name FROM admins WHERE id = ?', [id]) as any;
+        if (admins.length === 0) return res.status(404).json({ status: 'error', message: 'Admin not found' });
+        res.json({ status: 'success', admin: admins[0] });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+app.put('/api/admin/profile', async (req, res) => {
+    const { id, name, newPassword } = req.body;
+    try {
+        if (newPassword) {
+            const crypto = await import('crypto');
+            const hashedPwd = crypto.createHash('sha256').update(newPassword).digest('hex');
+            await db.query('UPDATE admins SET name = ?, password = ? WHERE id = ?', [name, hashedPwd, id]);
+        } else {
+            await db.query('UPDATE admins SET name = ? WHERE id = ?', [name, id]);
+        }
+        
+        const [admins] = await db.query('SELECT id, username, name FROM admins WHERE id = ?', [id]) as any;
+        res.json({ status: 'success', admin: admins[0] });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
 // Setup static file serving for Production (Render)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

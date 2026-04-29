@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { StoreProvider } from './store/StoreContext';
 import { LineAuthProvider } from './store/LineAuthContext';
+import { AdminAuthProvider } from './store/AdminAuthContext';
 import DriverLogin from './pages/driver/DriverLogin';
 
 // Layouts
@@ -18,6 +19,8 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import SurveyAudit from './pages/admin/SurveyAudit';
 import EmployeeManagementPage from './pages/admin/EmployeeManagementPage';
 import ProductManagement from './pages/admin/ProductManagement';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminProfile from './pages/admin/AdminProfile';
 import DigitalCatalog from './pages/driver/DigitalCatalog';
 import VisitHistory from './pages/driver/VisitHistory';
 
@@ -34,8 +37,9 @@ import SalesRecord from './pages/driver/SalesRecord';
 export default function App() {
   return (
     <StoreProvider>
-      <Router>
-        <Routes>
+      <AdminAuthProvider>
+        <Router>
+          <Routes>
           <Route path="/" element={<Navigate to="/driver" replace />} />
           
           <Route path="/driver" element={
@@ -57,6 +61,7 @@ export default function App() {
           
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
+            <Route path="profile" element={<AdminProfile />} />
             <Route path="map" element={<MapOverview />} />
             <Route path="fleet" element={<FleetTracking />} />
             <Route path="employees" element={<EmployeeManagementPage />} />
@@ -68,8 +73,10 @@ export default function App() {
             <Route path="catalog" element={<DigitalCatalog />} />
             <Route path="history" element={<VisitHistory />} />
           </Route>
+          <Route path="/admin/login" element={<AdminLogin />} />
         </Routes>
       </Router>
+      </AdminAuthProvider>
     </StoreProvider>
   );
 }

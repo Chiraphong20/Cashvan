@@ -54,7 +54,8 @@ export const initDB = async () => {
             `CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, phone VARCHAR(20), work_status VARCHAR(20) DEFAULT 'OFFLINE')`,
             `CREATE TABLE IF NOT EXISTS vehicles (id VARCHAR(50) PRIMARY KEY, plate_number VARCHAR(20) NOT NULL, code VARCHAR(20), status VARCHAR(20) DEFAULT 'AVAILABLE')`,
             `CREATE TABLE IF NOT EXISTS survey_targets (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, lat DOUBLE, lng DOUBLE, radius INT, color VARCHAR(20), status VARCHAR(20) DEFAULT 'ACTIVE')`,
-            `CREATE TABLE IF NOT EXISTS stock_transactions (id INT PRIMARY KEY AUTO_INCREMENT, product_id INT, quantity INT, source_location VARCHAR(50), target_location VARCHAR(50), transaction_type VARCHAR(20), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`
+            `CREATE TABLE IF NOT EXISTS stock_transactions (id INT PRIMARY KEY AUTO_INCREMENT, product_id INT, quantity INT, source_location VARCHAR(50), target_location VARCHAR(50), transaction_type VARCHAR(20), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS admins (id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50) UNIQUE, password VARCHAR(255), name VARCHAR(255))`
         ];
 
         for (const sql of tableQueries) {
@@ -123,6 +124,14 @@ export const initDB = async () => {
             console.log('🌱 Seeding initial database data...');
             await connection.query('INSERT INTO categories (name) VALUES ("เครื่องดื่ม"), ("ของขบเคี้ยว")');
             await connection.query('INSERT INTO vehicles (id, plate_number, code) VALUES ("V-01", "กข-1234", "VAN-01")');
+        }
+
+        const [adminCount] = await connection.query('SELECT COUNT(*) as count FROM admins') as any;
+        if (adminCount[0].count === 0) {
+            console.log('🌱 Seeding initial admin data...');
+            const crypto = await import('crypto');
+            const hashedPwd = crypto.default.createHash('sha256').update('password123').digest('hex');
+            await connection.query('INSERT INTO admins (username, password, name) VALUES (?, ?, ?)', ['admin', hashedPwd, 'System Admin']);
         }
 
         console.log('🚀 All systems ready.');
