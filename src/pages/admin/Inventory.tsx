@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStoreDB } from '../../store/StoreContext';
 
 export default function Inventory() {
-  const { inventories, products, categories, vehicles, transferStock, fetchInventory } = useStoreDB();
+  const { inventories, products, categories, vehicles, transferStock, fetchInventory, addProduct, updateInventory } = useStoreDB() as any;
   const [activeTab, setActiveTab] = useState<'vans' | 'master'>('vans');
   const [selectedVehicle, setSelectedVehicle] = useState('V-01');
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,6 +12,14 @@ export default function Inventory() {
   const [transferTargetVehicle, setTransferTargetVehicle] = useState('V-01');
   const [bulkQuantity, setBulkQuantity] = useState(100);
   const [isTransferring, setIsTransferring] = useState(false);
+
+  // New Product Modal State
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [newProductForm, setNewProductForm] = useState({ name: '', sku: '', category_id: 1, price: 0 });
+
+  // Editing Stock Modal
+  const [editingInventory, setEditingInventory] = useState<{product_id: number, name: string, current: number, location: string} | null>(null);
+  const [newQuantity, setNewQuantity] = useState(0);
 
   // Sync with Database on load or selection change
   React.useEffect(() => {
@@ -44,31 +52,36 @@ export default function Inventory() {
     alert(`โอนย้ายสินค้า ${transferItems.length} รายการไปยังรถ ${transferTargetVehicle} เรียบร้อยแล้ว!`);
   };
 
-  const currentVanStock = useMemo(() => {
-    const rawStock = inventories[selectedVehicle] || [];
-    return rawStock.filter(inv => {
-      const p = products.find(prod => prod.id === inv.product_id);
-      return p?.name.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-  }, [inventories, selectedVehicle, searchQuery, products]);
-
-  const filteredMasterProducts = useMemo(() => {
-    return products.filter(p => 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      p.sku.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [products, searchQuery]);
-
-  // Floating Refill Control Bar
-  const [editingInventory, setEditingInventory] = useState<{product_id: number, name: string, current: number, location: string} | null>(null);
-  const { updateInventory } = useStoreDB();
-  const [newQuantity, setNewQuantity] = useState(0);
+  const handleCreateProduct = async () => {
+    if (!newProductForm.name || !newProductForm.sku) {
+       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+       return;
+    }
+    await addProduct(newProductForm);
+    setIsAddingProduct(false);
+    setNewProductForm({ name: '', sku: '', category_id: 1, price: 0 });
+  };
 
   const handleUpdateStock = async () => {
     if (!editingInventory) return;
     await updateInventory(editingInventory.product_id, editingInventory.location, newQuantity);
     setEditingInventory(null);
   };
+
+  const currentVanStock = useMemo(() => {
+    const rawStock = inventories[selectedVehicle] || [];
+    return rawStock.filter(inv => {
+      const p = products.find((prod: any) => prod.id === inv.product_id);
+      return p?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [inventories, selectedVehicle, searchQuery, products]);
+
+  const filteredMasterProducts = useMemo(() => {
+    return products.filter((p: any) => 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      p.sku.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [products, searchQuery]);
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-700 pb-32">
@@ -107,7 +120,7 @@ export default function Inventory() {
                          value={selectedVehicle}
                          onChange={e => setSelectedVehicle(e.target.value)}
                        >
-                          {vehicles.map(v => <option key={v.id} value={v.id}>{v.plate_number} ({v.code})</option>)}
+                          {vehicles.map((v: any) => <option key={v.id} value={v.id}>{v.plate_number} ({v.code})</option>)}
                        </select>
                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Stock in Vehicle</p>
                     </div>
@@ -124,8 +137,8 @@ export default function Inventory() {
                  </div>
               </div>
               <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {currentVanStock.map(inv => {
-                    const p = products.find(prod => prod.id === inv.product_id);
+                  {currentVanStock.map((inv: any) => {
+                    const p = products.find((prod: any) => prod.id === inv.product_id);
                     return (
                       <div key={inv.product_id} className="p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100/50 flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all duration-500">
                          <div className="flex items-center gap-4">
@@ -157,7 +170,7 @@ export default function Inventory() {
                   {currentVanStock.length === 0 && (
                     <div className="col-span-full py-20 text-center opacity-30">
                        <span className="material-symbols-outlined text-6xl">inventory_2</span>
-                       <p className="font-black uppercase tracking-[0.2em] text-xs mt-4">ไม่มีสินค้าในหน่วยรถนี้</p>
+                       <p className="font-black uppercase tracking-[0.2em] text-xs mt-4">ไม่มีสินค้าในรถคันนี้</p>
                     </div>
                   )}
               </div>
@@ -165,94 +178,139 @@ export default function Inventory() {
         </div>
       ) : (
         <div className="space-y-6">
-           <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">
-              <div className="flex-1 relative min-w-[300px]">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
-                <input 
-                  type="text" 
-                  placeholder="ค้นหาแคตตาล็อกสินค้า..."
-                  className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-4 py-4 text-sm font-bold outline-none focus:ring-2 ring-primary/20"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-           </div>
+            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">
+               <div className="flex-1 relative min-w-[300px]">
+                 <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
+                 <input 
+                   type="text" 
+                   placeholder="ค้นหาแคตตาล็อกสินค้า..."
+                   className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-4 py-4 text-sm font-bold outline-none focus:ring-2 ring-primary/20"
+                   value={searchQuery}
+                   onChange={(e) => setSearchQuery(e.target.value)}
+                 />
+               </div>
+               <button 
+                 onClick={() => setIsAddingProduct(true)}
+                 className="bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 hover:scale-105 transition-all flex items-center gap-2"
+               >
+                 <span className="material-symbols-outlined text-sm">add_circle</span>
+                 เพิ่มสินค้าใหม่
+               </button>
+            </div>
 
-           <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden transition-all duration-500">
-              <table className="w-full text-left">
-                 <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100">
-                       <th className="px-8 py-6 w-16">
-                          <input 
-                            type="checkbox" 
-                            className="w-5 h-5 rounded-lg accent-primary" 
-                            checked={selectedProductIds.length === filteredMasterProducts.length && filteredMasterProducts.length > 0}
-                            onChange={() => {
-                              if (selectedProductIds.length === filteredMasterProducts.length) {
-                                setSelectedProductIds([]);
-                              } else {
-                                setSelectedProductIds(filteredMasterProducts.map(p => p.id));
-                              }
-                            }}
-                          />
-                       </th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Product Info</th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Master Stock</th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
-                    </tr>
-                 </thead>
-                 <tbody>
-                    {filteredMasterProducts.map(p => {
-                       const cat = categories.find(c => c.id === p.category_id);
-                       const isSelected = selectedProductIds.includes(p.id);
-                       const masterStock = inventories['MASTER']?.find(inv => inv.product_id === p.id)?.quantity || 0;
-                       return (
-                          <tr key={p.id} className={`border-b border-slate-50 transition-all ${isSelected ? 'bg-primary/5' : 'hover:bg-slate-50/50'}`}>
-                             <td className="px-8 py-6">
-                                <input 
-                                  type="checkbox" 
-                                  className="w-5 h-5 rounded-lg accent-primary" 
-                                  checked={isSelected}
-                                  onChange={() => toggleProductSelection(p.id)}
-                                />
-                             </td>
-                             <td className="px-8 py-6 uppercase">
-                                <div className="flex items-center gap-4">
-                                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-slate-100 text-slate-300'}`}>
-                                      <span className="material-symbols-outlined text-sm">inventory</span>
-                                   </div>
-                                   <div>
-                                      <p className="font-black text-slate-800 text-sm leading-tight">{p.name}</p>
-                                      <p className="text-[9px] font-black text-slate-400">ID: {p.sku}</p>
-                                   </div>
-                                </div>
-                             </td>
-                             <td className="px-8 py-6">
-                                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'}`}>
-                                   {cat?.name || 'Uncategorized'}
-                                </span>
-                             </td>
-                             <td className="px-8 py-6">
-                                <p className="font-black text-slate-800">{masterStock} <small className="text-slate-400">ชิ้น</small></p>
-                             </td>
-                             <td className="px-8 py-6">
-                                <button 
-                                  onClick={() => {
-                                    setEditingInventory({ product_id: p.id, name: p.name, current: masterStock, location: '' });
-                                    setNewQuantity(masterStock);
-                                  }}
-                                  className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg shadow-slate-900/10 hover:-translate-y-0.5 transition-all"
-                                >
-                                  <span className="material-symbols-outlined text-sm">add</span>
-                                  เติมสต็อกหลัก
-                                </button>
-                             </td>
-                          </tr>
-                       );
-                    })}
-                 </tbody>
-              </table>
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden transition-all duration-500">
+               <table className="w-full text-left">
+                  <thead>
+                     <tr className="bg-slate-50 border-b border-slate-100">
+                        <th className="px-8 py-6 w-16">
+                           <input 
+                             type="checkbox" 
+                             className="w-5 h-5 rounded-lg accent-primary" 
+                             checked={selectedProductIds.length === filteredMasterProducts.length && filteredMasterProducts.length > 0}
+                             onChange={() => {
+                               if (selectedProductIds.length === filteredMasterProducts.length) {
+                                 setSelectedProductIds([]);
+                               } else {
+                                 setSelectedProductIds(filteredMasterProducts.map((p: any) => p.id));
+                               }
+                             }}
+                           />
+                        </th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Product Info</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Master Stock</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {filteredMasterProducts.map((p: any) => {
+                        const cat = categories.find((c: any) => c.id === p.category_id);
+                        const isSelected = selectedProductIds.includes(p.id);
+                        const masterStock = inventories['MASTER']?.find((inv: any) => inv.product_id === p.id)?.quantity || 0;
+                        return (
+                           <tr key={p.id} className={`border-b border-slate-50 transition-all ${isSelected ? 'bg-primary/5' : 'hover:bg-slate-50/50'}`}>
+                              <td className="px-8 py-6">
+                                 <input 
+                                   type="checkbox" 
+                                   className="w-5 h-5 rounded-lg accent-primary" 
+                                   checked={isSelected}
+                                   onChange={() => toggleProductSelection(p.id)}
+                                 />
+                              </td>
+                              <td className="px-8 py-6 uppercase">
+                                 <div className="flex items-center gap-4">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-slate-100 text-slate-300'}`}>
+                                       <span className="material-symbols-outlined text-sm">inventory</span>
+                                    </div>
+                                    <div>
+                                       <p className="font-black text-slate-800 text-sm leading-tight">{p.name}</p>
+                                       <p className="text-[9px] font-black text-slate-400">ID: {p.sku}</p>
+                                    </div>
+                                 </div>
+                              </td>
+                              <td className="px-8 py-6">
+                                 <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-colors ${isSelected ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'}`}>
+                                    {cat?.name || 'Uncategorized'}
+                                 </span>
+                              </td>
+                              <td className="px-8 py-6">
+                                 <p className="font-black text-slate-800">{masterStock} <small className="text-slate-400">ชิ้น</small></p>
+                              </td>
+                              <td className="px-8 py-6">
+                                 <button 
+                                   onClick={() => {
+                                     setEditingInventory({ product_id: p.id, name: p.name, current: masterStock, location: '' });
+                                     setNewQuantity(masterStock);
+                                   }}
+                                   className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg shadow-slate-900/10 hover:-translate-y-0.5 transition-all"
+                                 >
+                                   <span className="material-symbols-outlined text-sm">add</span>
+                                   เติมสต็อกหลัก
+                                 </button>
+                              </td>
+                           </tr>
+                        );
+                     })}
+                  </tbody>
+               </table>
+            </div>
+        </div>
+      )}
+
+      {/* New Product Modal */}
+      {isAddingProduct && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[4000] flex items-center justify-center p-4">
+           <div className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
+              <div className="flex justify-between items-center">
+                 <h3 className="text-3xl font-black text-slate-900 tracking-tighter">เพิ่มสินค้าใหม่</h3>
+                 <button onClick={() => setIsAddingProduct(false)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
+                    <span className="material-symbols-outlined">close</span>
+                 </button>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                 <div className="col-span-2 space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ชื่อสินค้า</label>
+                    <input type="text" placeholder="เช่น น้ำดื่มสิงห์ 600ml" value={newProductForm.name} onChange={e => setNewProductForm({...newProductForm, name: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">SKU / รหัสสินค้า</label>
+                    <input type="text" placeholder="เช่น DR-001" value={newProductForm.sku} onChange={e => setNewProductForm({...newProductForm, sku: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ราคาขาย (฿)</label>
+                    <input type="number" placeholder="0.00" value={newProductForm.price} onChange={e => setNewProductForm({...newProductForm, price: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
+                 </div>
+                 <div className="col-span-2 space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase ml-1">หมวดหมู่</label>
+                    <select value={newProductForm.category_id} onChange={e => setNewProductForm({...newProductForm, category_id: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20">
+                       {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                 </div>
+              </div>
+              <div className="flex gap-4">
+                 <button onClick={handleCreateProduct} className="flex-1 bg-slate-900 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">สร้างสินค้า</button>
+                 <button onClick={() => setIsAddingProduct(false)} className="px-8 bg-slate-100 text-slate-400 py-5 rounded-2xl font-black uppercase text-xs">ยกเลิก</button>
+              </div>
            </div>
         </div>
       )}
@@ -265,7 +323,7 @@ export default function Inventory() {
                  <div>
                     <h3 className="text-xl font-black text-slate-800 leading-none">ปรับปรุงจำนวนสต็อก</h3>
                     <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">
-                       {editingInventory.location ? `รถทะเบียน: ${vehicles.find(v => v.id === editingInventory.location)?.plate_number}` : 'สต็อกส่วนกลาง (MASTER)'}
+                       {editingInventory.location ? `รถทะเบียน: ${vehicles.find((v: any) => v.id === editingInventory.location)?.plate_number}` : 'สต็อกส่วนกลาง (MASTER)'}
                     </p>
                  </div>
                  <button onClick={() => setEditingInventory(null)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
@@ -331,7 +389,7 @@ export default function Inventory() {
                       value={transferTargetVehicle}
                       onChange={e => setTransferTargetVehicle(e.target.value)}
                     >
-                       {vehicles.map(v => <option key={v.id} value={v.id} className="text-on-surface">{v.plate_number} ({v.code})</option>)}
+                       {vehicles.map((v: any) => <option key={v.id} value={v.id} className="text-on-surface">{v.plate_number} ({v.code})</option>)}
                     </select>
                  </div>
                  <div className="space-y-1">
