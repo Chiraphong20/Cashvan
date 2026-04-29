@@ -4,18 +4,21 @@ import { useStoreDB } from '../../store/StoreContext';
 export default function SalesReports() {
   const { sales, stores, drivers, products } = useStoreDB();
   const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month'>('today');
+  const [selectedBill, setSelectedBill] = useState<any | null>(null);
 
   // Detailed Sales List Logic
   const detailedSales = useMemo(() => {
     return sales.map(sale => {
       const store = stores.find(s => s.id === sale.store_id);
-      const driver = drivers.find(d => d.id === sale.driver_id);
+      const driver = drivers.find(d => String(d.id).trim() === String(sale.driver_id).trim() || (d as any).line_user_id === sale.driver_id);
       return {
         ...sale,
         storeName: store?.name || 'Unknown Store',
         address: store?.address || 'N/A',
+        lat: store?.lat,
+        lng: store?.lng,
         area: `${store?.district_name || '-'} / ${store?.sub_district_name || '-'}`,
-        driverName: driver?.name || 'Unknown Sale',
+        driverName: driver?.name || (driver as any)?.line_display_name || `Unknown (${sale.driver_id})`,
         itemsCount: sale.items?.length || 0
       };
     }).sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime());
@@ -26,8 +29,9 @@ export default function SalesReports() {
     const perf: Record<string, { name: string, total: number, stores: Set<string> }> = {};
     sales.forEach(s => {
       if (!perf[s.driver_id]) {
+        const d = drivers.find(d => String(d.id).trim() === String(s.driver_id).trim() || (d as any).line_user_id === s.driver_id);
         perf[s.driver_id] = { 
-          name: drivers.find(d => d.id === s.driver_id)?.name || 'Unknown', 
+          name: d?.name || (d as any)?.line_display_name || `Unknown (${s.driver_id})`, 
           total: 0, 
           stores: new Set() 
         };
@@ -138,7 +142,7 @@ export default function SalesReports() {
         <div className="lg:col-span-3 bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-black text-lg text-on-surface">รายการธุรกรรมล่าสุด</h3>
-             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-slate-200">History Log</span>
+             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-slate-200">History Log (Drivers: {drivers.length})</span>
           </div>
           <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
             <table className="w-full">
@@ -162,12 +166,27 @@ export default function SalesReports() {
                     <td className="px-4 py-5 min-w-[200px]">
                        <div className="font-black text-on-surface text-sm">{item.storeName}</div>
                        <div className="text-[9px] text-slate-400 font-bold truncate max-w-[200px] mt-0.5">{item.address}</div>
+                       {item.lat && item.lng && (
+                         <div className="text-[9px] text-primary font-bold mt-0.5 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[10px]">location_on</span>
+                            {item.lat.toFixed(6)}, {item.lng.toFixed(6)}
+                         </div>
+                       )}
                     </td>
                     <td className="px-4 py-5 font-bold text-slate-600 text-xs">{item.area}</td>
                     <td className="px-4 py-5">
                        <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[9px] font-black uppercase">{item.driverName}</span>
                     </td>
-                    <td className="px-8 py-5 text-right font-black text-primary text-sm">฿{Number(item.total_amount || 0).toLocaleString()}</td>
+                    <td className="px-8 py-5 text-right font-black text-primary text-sm flex items-center justify-end gap-3">
+                      ฿{Number(item.total_amount || 0).toLocaleString()}
+                      <button 
+                        onClick={() => setSelectedBill(item)}
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-600 p-1.5 rounded-lg transition-colors"
+                        title="ดูบิล"
+                      >
+                        <span className="material-symbols-outlined text-sm">receipt_long</span>
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -231,6 +250,84 @@ export default function SalesReports() {
            </div>
         </div>
       </div>
+
+      {/* Bill Modal */}
+      {selectedBill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                  <span className="material-symbols-outlined">receipt_long</span>
+                </div>
+                <div>
+                  <h3 className="font-black text-on-surface">รายละเอียดบิล</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{selectedBill.id}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedBill(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-400 transition-colors"
+              >
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-black text-on-surface">{selectedBill.storeName}</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-1">{selectedBill.address}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedBill.driverName}</p>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    {new Date(selectedBill.created_at || '').toLocaleString('th-TH')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border border-slate-100 rounded-2xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <tr>
+                      <th className="px-4 py-2 text-left">รายการ</th>
+                      <th className="px-4 py-2 text-center">จำนวน</th>
+                      <th className="px-4 py-2 text-right">รวม</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {selectedBill.items?.map((item: any, idx: number) => {
+                      const prod = products.find(p => p.id === item.product_id);
+                      return (
+                        <tr key={idx} className="hover:bg-slate-50/50">
+                          <td className="px-4 py-3 font-medium text-slate-600">{prod?.name || 'Unknown Product'}</td>
+                          <td className="px-4 py-3 text-center text-slate-500 font-bold">{item.quantity}</td>
+                          <td className="px-4 py-3 text-right font-black text-on-surface">฿{(item.quantity * item.price).toLocaleString()}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex justify-between items-center pt-4 border-t border-dashed border-slate-200">
+                <span className="font-black text-slate-400 uppercase tracking-widest text-xs">ยอดรวมทั้งสิ้น</span>
+                <span className="text-2xl font-black text-primary">฿{Number(selectedBill.total_amount || 0).toLocaleString()}</span>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button 
+                onClick={() => setSelectedBill(null)}
+                className="px-6 py-2 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider hover:bg-slate-800 transition-colors"
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

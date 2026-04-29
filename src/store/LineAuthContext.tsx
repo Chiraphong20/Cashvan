@@ -34,6 +34,12 @@ export const LineAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         await liff.init({ liffId });
         
         if (!liff.isLoggedIn()) {
+          if (window.location.hostname === 'localhost') {
+            console.warn('Bypassing LIFF login on localhost to prevent redirect error.');
+            setLiffProfile({ userId: 'dev_user', displayName: 'Dev User' });
+            setIsLoading(false);
+            return;
+          }
           liff.login({ redirectUri: window.location.origin });
           return;
         }
@@ -56,7 +62,7 @@ export const LineAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         console.error('LIFF Init Error:', err);
         setIsLiffError(true);
         // Fallback for development if not in LIFF
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV || window.location.hostname === 'localhost') {
            setLiffProfile({ userId: 'dev_user', displayName: 'Dev User' });
            setIsLoading(false);
         }

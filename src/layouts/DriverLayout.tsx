@@ -1,12 +1,20 @@
 import React from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useLineAuth } from '../store/LineAuthContext';
+import { useStoreDB } from '../store/StoreContext';
 import { Loader2 } from 'lucide-react';
 
 export default function DriverLayout() {
   const { currentDriver, isLoading } = useLineAuth();
+  const { setDriverId } = useStoreDB();
   const location = useLocation();
   const isLoginPage = location.pathname === '/driver/login';
+
+  React.useEffect(() => {
+    if (currentDriver?.id) {
+      setDriverId(currentDriver.id);
+    }
+  }, [currentDriver, setDriverId]);
 
   const activeTab = location.pathname.includes('/stores') ? 'stores' : 
                     location.pathname.includes('/stock') ? 'stock' : 'map';
