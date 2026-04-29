@@ -34,6 +34,7 @@ interface StoreContextType {
   addDriver: (driver: Driver) => Promise<void>;
   updateDriver: (id: string, updates: Partial<Driver>) => Promise<void>;
   deleteDriver: (id: string) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
   recordSale: (driverId: string, storeId: string, items: SaleItem[]) => Promise<void>;
   addVisit: (visit: Partial<Visit>) => Promise<void>;
   transferStock: (locationId: string, items: VanInventory[]) => Promise<void>;
@@ -268,6 +269,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const deleteSale = async (id: string) => {
+    if (!confirm('ยืนยันการลบบิลขายสินค้านี้? (สินค้าจะถูกคืนกลับสต็อกรถ)')) return;
+    try {
+      const response = await fetch(`/api/sales/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        await Promise.all([fetchInventory(''), fetchSales()]);
+      } else {
+        const err = await response.json();
+        alert('เกิดข้อผิดพลาด: ' + err.error);
+      }
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+    }
+  };
+
   const addVisit = async (visit: Partial<Visit>) => {
     try {
       await fetch('/api/visits', {
@@ -392,7 +408,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       stores, sales, inventories, visits, zones, products, categories, drivers, surveyTargets,
       loading, currentDriverId, currentVehicleId, setDriverId, setVehicleId, vehicles,
       addStore, updateStore, deleteStore, addDriver, updateDriver, deleteDriver,
-      recordSale, addVisit, transferStock, closeDay, returnStock,
+      recordSale, deleteSale, addVisit, transferStock, closeDay, returnStock,
       isCollapsed, setIsCollapsed, addSurveyTarget, deleteSurveyTarget,
       addProduct, updateProduct, deleteProduct, fetchInventory, fetchProductsAndCategories,
       fetchStoreById

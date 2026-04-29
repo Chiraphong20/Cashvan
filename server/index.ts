@@ -423,6 +423,48 @@ app.get('/api/inventory', async (req, res) => {
 });
 
 // Sales & Order Recording
+app.delete('/api/sales/:id', async (req, res) => {
+    const saleId = req.params.id;
+    const connection = await db.getConnection();
+    
+    try {
+        await connection.beginTransaction();
+        
+        // 1. Get the sale to find the vehicle_id
+        const [sales] = await connection.query('SELECT vehicle_id FROM sales WHERE id = ?', [saleId]) as any;
+        if (!sales || sales.length === 0) {
+            connection.release();
+            return res.status(404).json({ error: 'Sale not found' });
+        }
+        const vehicle_id = sales[0].vehicle_id;
+
+        // 2. Get sale items
+        const [items] = await connection.query('SELECT product_id, quantity FROM sale_items WHERE sale_id = ?', [saleId]) as any;
+
+        // 3. Refund inventory
+        if (vehicle_id) {
+            for (const item of items) {
+                await connection.execute(
+                    'UPDATE inventory SET quantity = quantity + ? WHERE product_id = ? AND location_id = ?',
+                    [item.quantity, item.product_id, vehicle_id]
+                );
+            }
+        }
+
+        // 4. Delete items and sale
+        await connection.execute('DELETE FROM sale_items WHERE sale_id = ?', [saleId]);
+        await connection.execute('DELETE FROM sales WHERE id = ?', [saleId]);
+        
+        await connection.commit();
+        res.json({ status: 'success' });
+    } catch (err: any) {
+        await connection.rollback();
+        res.status(500).json({ error: err.message });
+    } finally {
+        if (connection) connection.release();
+    }
+});
+
 app.get('/api/sales', async (req, res) => {
     try {
         // Fetch all sales first

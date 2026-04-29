@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useLineAuth } from '../store/LineAuthContext';
 import { useStoreDB } from '../store/StoreContext';
 import { Loader2 } from 'lucide-react';
+import ProgressBarLoader from '../components/ui/ProgressBarLoader';
 
 export default function DriverLayout() {
   const { currentDriver, isLoading } = useLineAuth();
@@ -22,8 +23,7 @@ export default function DriverLayout() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-        <h2 className="text-xl font-bold text-slate-800">กำลังยืนยันตัวตน...</h2>
+        <ProgressBarLoader text="กำลังยืนยันตัวตน..." subtext="ระบบกำลังประมวลผลข้อมูลการเข้าสู่ระบบ" />
       </div>
     );
   }

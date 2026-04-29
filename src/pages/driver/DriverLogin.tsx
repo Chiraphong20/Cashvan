@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLineAuth } from '../../store/LineAuthContext';
 import { useStoreDB } from '../../store/StoreContext';
 import { Loader2, Link2, UserCheck } from 'lucide-react';
+import ProgressBarLoader from '../../components/ui/ProgressBarLoader';
 
 export default function DriverLogin() {
   const { liffProfile, currentDriver, isLoading, bindDriver } = useLineAuth();
@@ -12,8 +13,7 @@ export default function DriverLogin() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-        <h2 className="text-xl font-bold text-slate-800">กำลังตรวจสอบข้อมูล LINE...</h2>
+        <ProgressBarLoader text="กำลังตรวจสอบข้อมูล LINE..." subtext="กรุณารอสักครู่ขณะระบบกำลังเชื่อมต่อ" />
       </div>
     );
   }

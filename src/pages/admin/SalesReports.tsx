@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStoreDB } from '../../store/StoreContext';
 
 export default function SalesReports() {
-  const { sales, stores, drivers, products } = useStoreDB();
+  const { sales, stores, drivers, products, deleteSale } = useStoreDB();
   const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month'>('today');
   const [selectedBill, setSelectedBill] = useState<any | null>(null);
 
@@ -185,6 +185,13 @@ export default function SalesReports() {
                         title="ดูบิล"
                       >
                         <span className="material-symbols-outlined text-sm">receipt_long</span>
+                      </button>
+                      <button 
+                        onClick={() => deleteSale(item.id)}
+                        className="bg-rose-50 hover:bg-rose-100 text-rose-600 p-1.5 rounded-lg transition-colors"
+                        title="ลบบิล (คืนสต็อก)"
+                      >
+                        <span className="material-symbols-outlined text-sm">delete</span>
                       </button>
                     </td>
                   </tr>
