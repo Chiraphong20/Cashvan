@@ -23,6 +23,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminProfile from './pages/admin/AdminProfile';
 import DigitalCatalog from './pages/driver/DigitalCatalog';
 import VisitHistory from './pages/driver/VisitHistory';
+import ManualEbook from './pages/shared/ManualEbook';
 
 // Driver Pages
 import CheckInMap from './pages/driver/CheckInMap';
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="catalog" element={<DigitalCatalog />} />
             <Route path="stores" element={<DriverStoreList />} />
             <Route path="stock" element={<DriverStock />} />
+            <Route path="manual" element={<ManualEbook />} />
           </Route>
           
           <Route path="/admin" element={<AdminLayout />}>
@@ -72,6 +74,7 @@ export default function App() {
             <Route path="audit" element={<SurveyAudit />} />
             <Route path="catalog" element={<DigitalCatalog />} />
             <Route path="history" element={<VisitHistory />} />
+            <Route path="manual" element={<ManualEbook />} />
           </Route>
           <Route path="/admin/login" element={<AdminLogin />} />
         </Routes>

@@ -54,9 +54,14 @@ export default function DriverLayout() {
               <h4 className="text-xs font-bold text-slate-800">{currentDriver.name}</h4>
             </div>
           </div>
-          <div className="px-2 py-1 bg-green-50 text-green-600 rounded-full flex items-center gap-1">
-             <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
-             <span className="text-[8px] font-black uppercase tracking-widest">Online</span>
+          <div className="flex items-center gap-2">
+            <Link to="/driver/manual" className="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-600 rounded-full hover:bg-primary hover:text-white transition-colors shadow-sm" title="คู่มือการใช้งาน">
+              <span className="material-symbols-outlined text-sm font-black">menu_book</span>
+            </Link>
+            <div className="px-2 py-1 bg-green-50 text-green-600 rounded-full flex items-center gap-1 shadow-sm">
+               <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div>
+               <span className="text-[8px] font-black uppercase tracking-widest">Online</span>
+            </div>
           </div>
         </div>
       )}

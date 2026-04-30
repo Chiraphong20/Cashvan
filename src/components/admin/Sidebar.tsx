@@ -10,6 +10,7 @@ const navItems = [
   { name: 'รายงานยอดขาย', icon: 'analytics', path: '/admin/sales' },
   { name: 'จัดการรายการสินค้า', icon: 'category', path: '/admin/products' },
   { name: 'ร้านค้าและผลสำรวจ', icon: 'database', path: '/admin/stores' },
+  { name: 'คู่มือการใช้งาน', icon: 'book', path: '/admin/manual' },
 ];
 
 interface SidebarProps {
