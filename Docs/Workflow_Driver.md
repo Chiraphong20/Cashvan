@@ -6,25 +6,25 @@
 
 ```mermaid
 flowchart TD
-    Start((เริ่มวันทำงาน)) --> Login[1. ล็อกอินเข้าแอป<br/>ผ่าน LINE LIFF]
+    Start((เริ่มวันทำงาน)) --> Login["1. ล็อกอินเข้าแอป<br/>ผ่าน LINE LIFF"]
     
-    Login --> StockCheck[2. ตรวจสอบสต็อก<br/>Van Stock]
+    Login --> StockCheck["2. ตรวจสอบสต็อก<br/>Van Stock"]
     
-    StockCheck --> CheckIn[3. แผนที่และการลงพื้นที่<br/>Check-In Map (ดึง GPS)]
+    StockCheck --> CheckIn["3. แผนที่และการลงพื้นที่<br/>Check-In Map (ดึง GPS)"]
     
-    CheckIn --> Survey[4. สำรวจร้านค้า<br/>ถ่ายรูป & กรอกข้อมูลสถานะ]
+    CheckIn --> Survey["4. สำรวจร้านค้า<br/>ถ่ายรูป & กรอกข้อมูลสถานะ"]
     
-    Survey --> Catalog[5. เสนอขายสินค้า<br/>Digital Catalog]
+    Survey --> Catalog["5. เสนอขายสินค้า<br/>Digital Catalog"]
     
-    Catalog --> Cart[6. บันทึกการขาย<br/>ตะกร้าสินค้า & คิดเงิน]
+    Catalog --> Cart["6. บันทึกการขาย<br/>ตะกร้าสินค้า & คิดเงิน"]
     
-    Cart --> Deduct[(7. ระบบตัดสต็อกอัตโนมัติ)]
+    Cart --> Deduct[("7. ระบบตัดสต็อกอัตโนมัติ")]
     Deduct --> CheckIn
     
-    Deduct --> EndDay{จบภารกิจเยี่ยมร้าน?}
+    Deduct --> EndDay{"จบภารกิจเยี่ยมร้าน?"}
     
     EndDay -- ไปร้านต่อไป --> CheckIn
-    EndDay -- กลับออฟฟิศ --> CloseDay[8. สรุปยอดขาย<br/>Close Day]
+    EndDay -- กลับออฟฟิศ --> CloseDay["8. สรุปยอดขาย<br/>Close Day"]
     
     CloseDay --> Finish((จบวันทำงาน))
     

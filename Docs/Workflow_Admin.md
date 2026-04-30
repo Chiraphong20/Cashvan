@@ -6,19 +6,19 @@
 
 ```mermaid
 flowchart TD
-    Start((เริ่มต้นวัน)) --> Login[1. ล็อกอินเข้าสู่ระบบ<br/>ผ่าน Web Browser]
+    Start((เริ่มต้นวัน)) --> Login["1. ล็อกอินเข้าสู่ระบบ<br/>ผ่าน Web Browser"]
     
-    Login --> Refill[2. เตรียมความพร้อม (Van Refill)<br/>โอนสต็อกจากคลังหลักไปที่รถ]
+    Login --> Refill["2. เตรียมความพร้อม (Van Refill)<br/>โอนสต็อกจากคลังหลักไปที่รถ"]
     
-    Refill --> Monitoring{3. ติดตามระหว่างวัน}
+    Refill --> Monitoring{"3. ติดตามระหว่างวัน"}
     
-    Monitoring --> Map[Map Overview<br/>ดูพิกัดพนักงานและร้านค้า]
-    Monitoring --> Audit[Survey Audit<br/>ตรวจสอบและอนุมัติภาพถ่ายร้านค้า]
+    Monitoring --> Map["Map Overview<br/>ดูพิกัดพนักงานและร้านค้า"]
+    Monitoring --> Audit["Survey Audit<br/>ตรวจสอบและอนุมัติภาพถ่ายร้านค้า"]
     
     Map --> EndDay
     Audit --> EndDay
     
-    EndDay{4. สิ้นสุดวันทำงาน} --> Report[5. ตรวจสอบรายงาน (Sales Reports)<br/>ดูยอดขายรวมและกระทบยอดเงิน]
+    EndDay{"4. สิ้นสุดวันทำงาน"} --> Report["5. ตรวจสอบรายงาน (Sales Reports)<br/>ดูยอดขายรวมและกระทบยอดเงิน"]
     Report --> Finish((จบกระบวนการ))
     
     classDef default fill:#f8fafc,stroke:#cbd5e1,stroke-width:2px,color:#334155;

@@ -78,7 +78,7 @@ export default function MapOverview() {
   const { stores, surveyTargets, sales, fetchStoreById, addStore, visits, isCollapsed, addSurveyTarget, deleteSurveyTarget, drivers } = useStoreDB();
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const selectedStore = useMemo(() => stores.find(s => s.id === selectedStoreId), [stores, selectedStoreId]);
-  
+
   const setSelectedStore = (store: any) => {
     setSelectedStoreId(store ? store.id : null);
   };
@@ -90,10 +90,10 @@ export default function MapOverview() {
   const [isDefiningTarget, setIsDefiningTarget] = useState(false);
   const [targetDraft, setTargetDraft] = useState<Partial<SurveyTarget> | null>(null);
   const [addMode, setAddMode] = useState(false);
-  
+
   // 11 Feature Checklist States
   const FIXED_WAREHOUSE = { lat: 14.99954784495029, lng: 102.11866307852294 };
-  const [warehouseRadius, setWarehouseRadius] = useState(5000); 
+  const [warehouseRadius, setWarehouseRadius] = useState(5000);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'SUCCESS'>('ALL');
   const [districtFilter, setDistrictFilter] = useState('');
@@ -125,7 +125,7 @@ export default function MapOverview() {
   const handleMapClick = async (lat: number, lng: number) => {
     if (addMode) {
       const detectedDistrict = findDistrictByCoords(lat, lng);
-      
+
       let detectedZone = '';
       surveyTargets.forEach(target => {
         const dist = L.latLng(lat, lng).distanceTo(L.latLng(target.lat, target.lng));
@@ -154,7 +154,7 @@ export default function MapOverview() {
       const matchesSubDistrict = !subDistrictFilter || store.sub_district_name === subDistrictFilter;
       const matchesDriver = !driverFilter || store.assigned_driver_id === driverFilter;
       const matchesCustomer = isCustomerFilter === 'ALL' || (isCustomerFilter === 'YES' && store.is_customer) || (isCustomerFilter === 'NO' && !store.is_customer);
-      
+
       const distToWarehouse = L.latLng(store.lat, store.lng).distanceTo(L.latLng(FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng));
       // Radius is used visually, no longer restricts store visibility
       // const matchesRadius = distToWarehouse <= warehouseRadius;
@@ -172,7 +172,7 @@ export default function MapOverview() {
           matchesDate = matchesDate && storeDate <= end;
         }
       }
-      
+
       return matchesSearch && matchesStatus && matchesDistrict && matchesSubDistrict && matchesDriver && matchesCustomer && matchesDate;
     });
   }, [stores, searchTerm, statusFilter, districtFilter, subDistrictFilter, driverFilter, isCustomerFilter, warehouseRadius, startDate, endDate]);
@@ -190,27 +190,27 @@ export default function MapOverview() {
 
           {/* Store Markers */}
           {filteredStores.map(store => (
-            <Marker 
-              key={store.id} 
-              position={[store.lat, store.lng]} 
+            <Marker
+              key={store.id}
+              position={[store.lat, store.lng]}
               icon={getCustomMarker(store.type, store.status, store.is_admin_only)}
             >
               <Popup className="precision-popup">
                 <div className="p-1 min-w-[150px] font-body">
                   <h3 className="font-black text-sm text-slate-800 mb-1 px-1 text-center">{store.name}</h3>
-                  <button 
+                  <button
                     onClick={() => {
                       setSelectedStore(store);
-                    }} 
+                    }}
                     className="w-full bg-slate-900 text-white py-2.5 rounded-xl text-[10px] font-black uppercase mt-2 shadow-lg shadow-slate-900/20 active:scale-95 transition-all"
                   >
                     ดูรายละเอียด
                   </button>
-                  <a 
+                  <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${store.lat},${store.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full bg-blue-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase mt-1.5 shadow-lg shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-white 600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase mt-1.5 shadow-lg shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[14px]">directions</span>
                     นำเส้นทาง
@@ -230,9 +230,9 @@ export default function MapOverview() {
           {/* Target Zones Overlay */}
           {surveyTargets.map(target => (
             <React.Fragment key={target.id}>
-              <Circle 
-                center={[target.lat, target.lng]} 
-                radius={target.radius} 
+              <Circle
+                center={[target.lat, target.lng]}
+                radius={target.radius}
                 pathOptions={{ fillColor: target.color, color: target.color, fillOpacity: 0.15, weight: 2, dashArray: '5, 5' }}
                 eventHandlers={{
                   click: (e) => {
@@ -245,32 +245,32 @@ export default function MapOverview() {
                 <Popup className="precision-popup">
                   <div className="p-3 min-w-[180px] font-body">
                     <div className="flex items-center gap-2 mb-3">
-                       <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: target.color }}>
-                          <span className="material-symbols-outlined text-sm">track_changes</span>
-                       </div>
-                       <div>
-                          <h3 className="font-black text-xs text-slate-800 leading-none">{target.name}</h3>
-                          <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase">เป้าหมายพื้นที่สำรวจ</p>
-                       </div>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: target.color }}>
+                        <span className="material-symbols-outlined text-sm">track_changes</span>
+                      </div>
+                      <div>
+                        <h3 className="font-black text-xs text-slate-800 leading-none">{target.name}</h3>
+                        <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase">เป้าหมายพื้นที่สำรวจ</p>
+                      </div>
                     </div>
-                    
+
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4">
-                       <div className="flex justify-between items-center mb-1">
-                          <span className="text-[9px] font-black text-slate-400 uppercase">ร้านค้าในพื้นที่</span>
-                          <span className="text-xs font-black text-primary">{getStoresInTarget(target)} ร้าน</span>
-                       </div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-[9px] font-black text-slate-400 uppercase">ร้านค้าในพื้นที่</span>
+                        <span className="text-xs font-black text-primary">{getStoresInTarget(target)} ร้าน</span>
+                      </div>
                     </div>
 
                     <div className="flex gap-2">
-                       <button onClick={() => handleEditTarget(target)} className="flex-1 bg-slate-900 text-white py-2 rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1">แก้ไข</button>
-                       <button onClick={() => deleteSurveyTarget(target.id)} className="w-10 h-8 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center"><span className="material-symbols-outlined text-sm">delete</span></button>
+                      <button onClick={() => handleEditTarget(target)} className="flex-1 bg-slate-900 text-white py-2 rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1">แก้ไข</button>
+                      <button onClick={() => deleteSurveyTarget(target.id)} className="w-10 h-8 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center"><span className="material-symbols-outlined text-sm">delete</span></button>
                     </div>
                   </div>
                 </Popup>
               </Circle>
               {/* Area Name Label */}
-              <Marker 
-                position={[target.lat, target.lng]} 
+              <Marker
+                position={[target.lat, target.lng]}
                 icon={L.divIcon({
                   className: 'bg-transparent border-0',
                   html: `
@@ -292,7 +292,7 @@ export default function MapOverview() {
         {/* UI Overlays */}
         <div className="absolute top-6 right-6 z-[1000] flex flex-col items-end gap-4 pointer-events-none w-80">
           <div className="w-full pointer-events-auto">
-            <FilterPanel 
+            <FilterPanel
               searchTerm={searchTerm} setSearchTerm={setSearchTerm}
               statusFilter={statusFilter} setStatusFilter={setStatusFilter}
               districtFilter={districtFilter} setDistrictFilter={setDistrictFilter}
@@ -318,337 +318,337 @@ export default function MapOverview() {
               <LegendItem icon="warehouse" label="โกดังสินค้า" color="bg-blue-900" isBox />
             </div>
             <div className="mt-4 pt-4 border-t border-dashed border-slate-200">
-               <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-2 border-blue-900 border-dashed rounded-full bg-blue-900/5"></div>
-                  <span className="text-[10px] font-black text-on-surface uppercase tracking-tighter">รัศมีบริการ ({(warehouseRadius/1000).toFixed(0)} KM)</span>
-               </div>
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-blue-900 border-dashed rounded-full bg-blue-900/5"></div>
+                <span className="text-[10px] font-black text-on-surface uppercase tracking-tighter">รัศมีบริการ ({(warehouseRadius / 1000).toFixed(0)} KM)</span>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="absolute top-24 left-4 z-[1000] flex flex-col gap-2">
-           <button onClick={() => setIsDefiningTarget(!isDefiningTarget)} className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${isDefiningTarget ? 'bg-amber-500 text-white animate-pulse' : 'bg-white text-slate-700'}`}>
-              <span className="material-symbols-outlined text-lg">track_changes</span>
-              ปักพื้นที่เป้าหมาย
-           </button>
-           <button onClick={() => {
-              setNewData({ ...newData, name: '', is_admin_only: false, lat: 14.999547, lng: 102.118663, status: 'UNSURVEYED' });
-              setIsAdding(true);
-           }} className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${addMode ? 'bg-[#f43f5e] text-white animate-pulse' : 'bg-white text-slate-700'}`}>
-              <span className="material-symbols-outlined text-lg">add_location_alt</span>
-              เพิ่มร้านใหม่ {addMode && '(กำลังเลือกหมุด...)'}
-           </button>
+          <button onClick={() => setIsDefiningTarget(!isDefiningTarget)} className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${isDefiningTarget ? 'bg-amber-500 text-white animate-pulse' : 'bg-white text-slate-700'}`}>
+            <span className="material-symbols-outlined text-lg">track_changes</span>
+            ปักพื้นที่เป้าหมาย
+          </button>
+          <button onClick={() => {
+            setNewData({ ...newData, name: '', is_admin_only: false, lat: 14.999547, lng: 102.118663, status: 'UNSURVEYED' });
+            setIsAdding(true);
+          }} className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${addMode ? 'bg-[#f43f5e] text-white animate-pulse' : 'bg-white text-slate-700'}`}>
+            <span className="material-symbols-outlined text-lg">add_location_alt</span>
+            เพิ่มร้านใหม่ {addMode && '(กำลังเลือกหมุด...)'}
+          </button>
         </div>
 
         {/* Modals & Slide-overs */}
         {selectedStore && (
           <div className="absolute inset-y-0 right-0 w-96 bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.1)] z-[2000] animate-in slide-in-from-right duration-500 flex flex-col">
-             <div className="p-8 pb-4 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
-                      <span className="material-symbols-outlined font-variation-fill">storefront</span>
-                   </div>
-                   <div>
-                      <h3 className="text-xl font-black text-slate-800 leading-none">รายละเอียดร้านค้า</h3>
-                      <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Store Intelligence</p>
-                   </div>
+            <div className="p-8 pb-4 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                  <span className="material-symbols-outlined font-variation-fill">storefront</span>
                 </div>
-                <button onClick={() => setSelectedStore(null)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
-                   <span className="material-symbols-outlined">close</span>
-                </button>
-             </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800 leading-none">รายละเอียดร้านค้า</h3>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Store Intelligence</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedStore(null)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
 
-             <div className="flex-1 overflow-y-auto px-8 py-4 space-y-8">
-                {/* Visual Status */}
-                <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100">
-                   <div className="flex flex-col items-center text-center">
-                      <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 ${selectedStore.status === 'SUCCESS' ? 'bg-secondary/10 text-secondary' : 'bg-rose-500/10 text-rose-500'}`}>
-                         {selectedStore.status === 'SUCCESS' ? 'สำรวจสำเร็จ' : 'รอดำเนินการ'}
-                      </div>
-                      <h2 className="text-2xl font-black text-slate-900 mb-1">{selectedStore.name}</h2>
-                      <p className="text-xs font-bold text-slate-400 max-w-[200px] leading-relaxed">{selectedStore.address || 'ไม่มีข้อมูลที่อยู่'}</p>
-                   </div>
-                   
-                   <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-dashed border-slate-200">
-                      <div className="text-center">
-                         <p className="text-[10px] font-black text-slate-400 uppercase mb-1 underline decoration-primary/30 decoration-2">โซนพื้นที่</p>
-                         <p className="font-black text-slate-800">{selectedStore.sub_district_name || 'ไม่ระบุ'}</p>
-                      </div>
-                      <div className="text-center">
-                         <p className="text-[10px] font-black text-slate-400 uppercase mb-1 underline decoration-primary/30 decoration-2">ประเภท</p>
-                         <p className="font-black text-slate-800 tracking-tighter capitalize">{selectedStore.type}</p>
-                      </div>
-                   </div>
+            <div className="flex-1 overflow-y-auto px-8 py-4 space-y-8">
+              {/* Visual Status */}
+              <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100">
+                <div className="flex flex-col items-center text-center">
+                  <div className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 ${selectedStore.status === 'SUCCESS' ? 'bg-secondary/10 text-secondary' : 'bg-rose-500/10 text-rose-500'}`}>
+                    {selectedStore.status === 'SUCCESS' ? 'สำรวจสำเร็จ' : 'รอดำเนินการ'}
+                  </div>
+                  <h2 className="text-2xl font-black text-slate-900 mb-1">{selectedStore.name}</h2>
+                  <p className="text-xs font-bold text-slate-400 max-w-[200px] leading-relaxed">{selectedStore.address || 'ไม่มีข้อมูลที่อยู่'}</p>
                 </div>
 
+                <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-dashed border-slate-200">
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1 underline decoration-primary/30 decoration-2">โซนพื้นที่</p>
+                    <p className="font-black text-slate-800">{selectedStore.sub_district_name || 'ไม่ระบุ'}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1 underline decoration-primary/30 decoration-2">ประเภท</p>
+                    <p className="font-black text-slate-800 tracking-tighter capitalize">{selectedStore.type}</p>
+                  </div>
+                </div>
+              </div>
 
-                {/* Action Buttons */}
-                <div className="space-y-3 pt-4">
-                   <div className="grid grid-cols-2 gap-3">
-                      <button className="bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                        แก้ไขข้อมูล
-                      </button>
-                      <a 
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStore.lat},${selectedStore.lng}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <button className="bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined text-sm">edit</span>
+                    แก้ไขข้อมูล
+                  </button>
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedStore.lat},${selectedStore.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-sm">directions</span>
+                    นำเส้นทาง
+                  </a>
+                </div>
+
+                {(() => {
+                  const hasSales = sales.some(s => s.store_id === selectedStore.id);
+                  const saleCount = sales.filter(s => s.store_id === selectedStore.id).length;
+
+                  if (!hasSales) {
+                    return (
+                      <button
+                        disabled
+                        className="w-full bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] cursor-not-allowed flex items-center justify-center gap-2"
                       >
-                        <span className="material-symbols-outlined text-sm">directions</span>
-                        นำเส้นทาง
-                      </a>
-                   </div>
+                        <span className="material-symbols-outlined text-sm">history</span>
+                        ไม่มีประวัติขาย
+                      </button>
+                    );
+                  }
 
-                   {(() => {
-                      const hasSales = sales.some(s => s.store_id === selectedStore.id);
-                      const saleCount = sales.filter(s => s.store_id === selectedStore.id).length;
-                      
-                      if (!hasSales) {
-                        return (
-                          <button 
-                           disabled
-                           className="w-full bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] cursor-not-allowed flex items-center justify-center gap-2"
-                          >
-                            <span className="material-symbols-outlined text-sm">history</span>
-                            ไม่มีประวัติขาย
-                          </button>
-                        );
-                      }
-                      
-                      return (
-                        <button 
-                         onClick={() => setShowSalesHistory(true)}
-                         className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-slate-900/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
-                        >
-                          <span className="material-symbols-outlined text-sm">receipt_long</span>
-                          ดูประวัติขาย
-                          <span className="bg-white/20 px-2 py-0.5 rounded-full text-[9px]">{saleCount} บิล</span>
-                        </button>
-                      );
-                   })()}
-                </div>
-             </div>
+                  return (
+                    <button
+                      onClick={() => setShowSalesHistory(true)}
+                      className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-slate-900/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-sm">receipt_long</span>
+                      ดูประวัติขาย
+                      <span className="bg-white/20 px-2 py-0.5 rounded-full text-[9px]">{saleCount} บิล</span>
+                    </button>
+                  );
+                })()}
+              </div>
+            </div>
 
-             <div className="p-8 pt-0">
-                <div className="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
-                   <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">พนักงานดูแล</p>
-                   <div className="flex items-center gap-2">
-                       <span className="text-[11px] font-black text-slate-800 underline decoration-rose-200 decoration-2 italic">สมชาย ใจดี</span>
-                       <div className="w-6 h-6 rounded-full bg-rose-200"></div>
-                   </div>
+            <div className="p-8 pt-0">
+              <div className="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex items-center justify-between">
+                <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">พนักงานดูแล</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-black text-slate-800 underline decoration-rose-200 decoration-2 italic">สมชาย ใจดี</span>
+                  <div className="w-6 h-6 rounded-full bg-rose-200"></div>
                 </div>
-             </div>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Sales History Overlay */}
         {showSalesHistory && selectedStore && (
           <div className="absolute inset-y-0 right-0 w-[450px] bg-slate-50 shadow-[-30px_0_60px_rgba(0,0,0,0.2)] z-[3000] animate-in slide-in-from-right duration-500 flex flex-col border-l border-white/20">
-             <div className="p-8 pb-4 flex justify-between items-center bg-white border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                   <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20">
-                      <span className="material-symbols-outlined text-2xl">receipt_long</span>
-                   </div>
-                   <div>
-                      <h3 className="text-xl font-black text-slate-800 leading-none">ประวัติยอดขาย</h3>
-                      <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{selectedStore.name}</p>
-                   </div>
+            <div className="p-8 pb-4 flex justify-between items-center bg-white border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20">
+                  <span className="material-symbols-outlined text-2xl">receipt_long</span>
                 </div>
-                <button onClick={() => setShowSalesHistory(false)} className="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
-                   <span className="material-symbols-outlined">close</span>
-                </button>
-             </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800 leading-none">ประวัติยอดขาย</h3>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{selectedStore.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowSalesHistory(false)} className="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
 
-             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {(() => {
-                   const storeSales = sales.filter(s => s.store_id === selectedStore.id);
-                   
-                   if (storeSales.length === 0) return (
-                     <div className="flex flex-col items-center justify-center py-20 opacity-30">
-                        <span className="material-symbols-outlined text-6xl">history_toggle_off</span>
-                        <p className="text-sm font-black uppercase mt-4">ยังไม่มีประวัติการซื้อขาย</p>
-                     </div>
-                   );
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {(() => {
+                const storeSales = sales.filter(s => s.store_id === selectedStore.id);
 
-                   return storeSales.sort((a,b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()).map(sale => (
-                     <div key={sale.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:border-slate-300 transition-all group">
-                        <div className="flex justify-between items-start mb-4">
-                           <div>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">เลขที่บิล: {sale.id}</p>
-                              <p className="text-xs font-black text-slate-800">{new Date(sale.created_at || '').toLocaleDateString('th-TH', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                           </div>
-                           <div className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-black">
-                              ฿{Number(sale.total_amount).toLocaleString()}
-                           </div>
-                        </div>
-                        
-                        <div className="space-y-2 pt-2 border-t border-dashed border-slate-100">
-                           {sale.items?.map((item: any, idx: number) => (
-                             <div key={idx} className="flex justify-between text-[10px] font-bold text-slate-500">
-                                <span className="flex gap-2">
-                                  <span className="text-slate-300">•</span>
-                                  {item.product_name || `สินค้า #${item.product_id}`} x {item.quantity}
-                                </span>
-                                <span>฿{(item.price * item.quantity).toLocaleString()}</span>
-                             </div>
-                           ))}
-                        </div>
+                if (storeSales.length === 0) return (
+                  <div className="flex flex-col items-center justify-center py-20 opacity-30">
+                    <span className="material-symbols-outlined text-6xl">history_toggle_off</span>
+                    <p className="text-sm font-black uppercase mt-4">ยังไม่มีประวัติการซื้อขาย</p>
+                  </div>
+                );
 
-                        <div className="mt-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                           <p className="text-[8px] font-black text-slate-300 uppercase">พนักงาน: {sale.driver_id}</p>
-                           <button className="text-[10px] font-black text-primary flex items-center gap-1">ดูใบเสร็จ <span className="material-symbols-outlined text-xs">open_in_new</span></button>
+                return storeSales.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()).map(sale => (
+                  <div key={sale.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:border-slate-300 transition-all group">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">เลขที่บิล: {sale.id}</p>
+                        <p className="text-xs font-black text-slate-800">{new Date(sale.created_at || '').toLocaleDateString('th-TH', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                      </div>
+                      <div className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-black">
+                        ฿{Number(sale.total_amount).toLocaleString()}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-dashed border-slate-100">
+                      {sale.items?.map((item: any, idx: number) => (
+                        <div key={idx} className="flex justify-between text-[10px] font-bold text-slate-500">
+                          <span className="flex gap-2">
+                            <span className="text-slate-300">•</span>
+                            {item.product_name || `สินค้า #${item.product_id}`} x {item.quantity}
+                          </span>
+                          <span>฿{(item.price * item.quantity).toLocaleString()}</span>
                         </div>
-                     </div>
-                   ));
-                })()}
-             </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-[8px] font-black text-slate-300 uppercase">พนักงาน: {sale.driver_id}</p>
+                      <button className="text-[10px] font-black text-primary flex items-center gap-1">ดูใบเสร็จ <span className="material-symbols-outlined text-xs">open_in_new</span></button>
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
           </div>
         )}
 
         {isAdding && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-             <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-8 shadow-2xl space-y-6">
-                <h3 className="text-2xl font-black text-on-surface tracking-tighter">เพิ่มข้อมูลร้านค้าใหม่</h3>
-                <input type="text" placeholder="ชื่อร้านค้า" className="w-full bg-slate-50 p-4 rounded-xl font-bold outline-none border-2 border-slate-100" value={newData.name} onChange={e => setNewData({...newData, name: e.target.value})} />
-                
-                <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border-2 border-slate-100">
-                   <div className="flex justify-between items-center mb-1">
-                     <label className="text-[10px] font-black uppercase text-slate-500">พิกัดสถานที่ (Latitude / Longitude)</label>
-                     <button onClick={() => { setIsAdding(false); setAddMode(true); }} className="text-[10px] font-black text-primary flex items-center gap-1 hover:underline px-2 py-1 bg-primary/10 rounded-lg transition-colors">
-                        <span className="material-symbols-outlined text-[14px]">location_on</span> เลือกจากแผนที่
-                     </button>
-                   </div>
-                   <div className="flex flex-col gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="วางพิกัดที่นี่ (เช่น 14.999547, 102.118663)" 
-                        className="w-full bg-white p-3 rounded-xl font-bold outline-none border border-slate-200 text-xs focus:border-primary/50 text-slate-700" 
-                        value={coordText} 
-                        onChange={e => {
-                          const val = e.target.value;
-                          setCoordText(val);
-                          const match = val.match(/([\d.-]+)[\s,]+([\d.-]+)/);
-                          if (match) {
-                            const lat = parseFloat(match[1]);
-                            const lng = parseFloat(match[2]);
-                            let detectedZone = '';
-                            surveyTargets.forEach(target => {
-                              const dist = L.latLng(lat, lng).distanceTo(L.latLng(target.lat, target.lng));
-                              if (dist <= target.radius) detectedZone = target.name;
-                            });
-                            setNewData({ ...newData, lat, lng, sales_zone: detectedZone });
-                          }
-                        }} 
-                      />
-                      {newData.sales_zone && (
-                        <div className="text-[10px] font-bold text-primary flex items-center gap-1 px-1">
-                          <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                          พิกัดอยู่ในโซน: {newData.sales_zone}
-                        </div>
-                      )}
-                   </div>
+            <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-8 shadow-2xl space-y-6">
+              <h3 className="text-2xl font-black text-on-surface tracking-tighter">เพิ่มข้อมูลร้านค้าใหม่</h3>
+              <input type="text" placeholder="ชื่อร้านค้า" className="w-full bg-slate-50 p-4 rounded-xl font-bold outline-none border-2 border-slate-100" value={newData.name} onChange={e => setNewData({ ...newData, name: e.target.value })} />
+
+              <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border-2 border-slate-100">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[10px] font-black uppercase text-slate-500">พิกัดสถานที่ (Latitude / Longitude)</label>
+                  <button onClick={() => { setIsAdding(false); setAddMode(true); }} className="text-[10px] font-black text-primary flex items-center gap-1 hover:underline px-2 py-1 bg-primary/10 rounded-lg transition-colors">
+                    <span className="material-symbols-outlined text-[14px]">location_on</span> เลือกจากแผนที่
+                  </button>
                 </div>
-                <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white"><span className="material-symbols-outlined text-lg">visibility_off</span></div>
-                      <div>
-                         <h4 className="text-xs font-black text-amber-900">ปักเป็นหมุดลับ (Admin Only)</h4>
-                         <p className="text-[10px] text-amber-600 font-bold">พนักงานจะไม่เห็นหมุดนี้</p>
-                      </div>
-                   </div>
-                   <input type="checkbox" className="w-6 h-6 accent-amber-500" checked={newData.is_admin_only} onChange={e => setNewData({...newData, is_admin_only: e.target.checked})} />
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="text"
+                    placeholder="วางพิกัดที่นี่ (เช่น 14.999547, 102.118663)"
+                    className="w-full bg-white p-3 rounded-xl font-bold outline-none border border-slate-200 text-xs focus:border-primary/50 text-slate-700"
+                    value={coordText}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setCoordText(val);
+                      const match = val.match(/([\d.-]+)[\s,]+([\d.-]+)/);
+                      if (match) {
+                        const lat = parseFloat(match[1]);
+                        const lng = parseFloat(match[2]);
+                        let detectedZone = '';
+                        surveyTargets.forEach(target => {
+                          const dist = L.latLng(lat, lng).distanceTo(L.latLng(target.lat, target.lng));
+                          if (dist <= target.radius) detectedZone = target.name;
+                        });
+                        setNewData({ ...newData, lat, lng, sales_zone: detectedZone });
+                      }
+                    }}
+                  />
+                  {newData.sales_zone && (
+                    <div className="text-[10px] font-bold text-primary flex items-center gap-1 px-1">
+                      <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                      พิกัดอยู่ในโซน: {newData.sales_zone}
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-4">
-                   <button onClick={() => { addStore(newData); setIsAdding(false); }} className="flex-1 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-all">สร้างข้อมูลร้าน</button>
-                   <button onClick={() => setIsAdding(false)} className="px-8 bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase">ยกเลิก</button>
+              </div>
+              <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white"><span className="material-symbols-outlined text-lg">visibility_off</span></div>
+                  <div>
+                    <h4 className="text-xs font-black text-amber-900">ปักเป็นหมุดลับ (Admin Only)</h4>
+                    <p className="text-[10px] text-amber-600 font-bold">พนักงานจะไม่เห็นหมุดนี้</p>
+                  </div>
                 </div>
-             </div>
+                <input type="checkbox" className="w-6 h-6 accent-amber-500" checked={newData.is_admin_only} onChange={e => setNewData({ ...newData, is_admin_only: e.target.checked })} />
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => { addStore(newData); setIsAdding(false); }} className="flex-1 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-all">สร้างข้อมูลร้าน</button>
+                <button onClick={() => setIsAdding(false)} className="px-8 bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase">ยกเลิก</button>
+              </div>
+            </div>
           </div>
         )}
         {/* Target Area Configuration Modal */}
         {targetDraft && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-             <div className="bg-white rounded-[3rem] w-full max-w-md p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
-                <div className="flex items-center gap-4 mb-2">
-                   <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
-                      <span className="material-symbols-outlined text-2xl">track_changes</span>
-                   </div>
-                   <div>
-                      <h3 className="text-xl font-black text-slate-800 leading-none">กำหนดพื้นที่เป้าหมาย</h3>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Configure Target Survey Area</p>
-                   </div>
+            <div className="bg-white rounded-[3rem] w-full max-w-md p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                  <span className="material-symbols-outlined text-2xl">track_changes</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800 leading-none">กำหนดพื้นที่เป้าหมาย</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Configure Target Survey Area</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1">ชื่อเรียกพื้นที่</label>
+                  <input
+                    type="text"
+                    placeholder="เช่น พื้นที่ตลาดโคราช, โซนเขตเมือง..."
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-xs font-bold outline-none focus:border-amber-500/30 transition-all"
+                    value={targetDraft.name}
+                    onChange={e => setTargetDraft({ ...targetDraft, name: e.target.value })}
+                  />
                 </div>
 
-                <div className="space-y-4">
-                   <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1">ชื่อเรียกพื้นที่</label>
-                      <input 
-                        type="text" 
-                        placeholder="เช่น พื้นที่ตลาดโคราช, โซนเขตเมือง..." 
-                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-xs font-bold outline-none focus:border-amber-500/30 transition-all"
-                        value={targetDraft.name} 
-                        onChange={e => setTargetDraft({...targetDraft, name: e.target.value})} 
+                <div className="space-y-3 bg-slate-50 p-6 rounded-[2rem] border-2 border-slate-100 italic">
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[10px] font-black uppercase text-amber-600">ขอบเขตพื้นที่ (Area Radius)</label>
+                    <span className="text-sm font-black text-slate-800">{(targetDraft.radius / 1000).toFixed(1)} KM</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="100"
+                    max="20000"
+                    step="100"
+                    className="w-full accent-amber-500"
+                    value={targetDraft.radius}
+                    onChange={e => setTargetDraft({ ...targetDraft, radius: parseInt(e.target.value) })}
+                  />
+                  <div className="flex justify-between text-[8px] font-black text-slate-300 uppercase">
+                    <span>0.1 KM</span>
+                    <span>20 KM</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1">เลือกสีระบุโซน</label>
+                  <div className="flex gap-3">
+                    {['#f59e0b', '#3b82f6', '#ef4444', '#10b981', '#8b5cf6'].map(color => (
+                      <button
+                        key={color}
+                        onClick={() => setTargetDraft({ ...targetDraft, color })}
+                        className={`w-10 h-10 rounded-full border-4 transition-all ${targetDraft.color === color ? 'border-slate-800 scale-110 shadow-lg' : 'border-transparent shadow-sm'}`}
+                        style={{ backgroundColor: color }}
                       />
-                   </div>
-
-                   <div className="space-y-3 bg-slate-50 p-6 rounded-[2rem] border-2 border-slate-100 italic">
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="text-[10px] font-black uppercase text-amber-600">ขอบเขตพื้นที่ (Area Radius)</label>
-                        <span className="text-sm font-black text-slate-800">{(targetDraft.radius / 1000).toFixed(1)} KM</span>
-                      </div>
-                      <input 
-                        type="range" 
-                        min="100" 
-                        max="20000" 
-                        step="100"
-                        className="w-full accent-amber-500"
-                        value={targetDraft.radius}
-                        onChange={e => setTargetDraft({...targetDraft, radius: parseInt(e.target.value)})}
-                      />
-                      <div className="flex justify-between text-[8px] font-black text-slate-300 uppercase">
-                         <span>0.1 KM</span>
-                         <span>20 KM</span>
-                      </div>
-                   </div>
-
-                   <div className="space-y-1.5">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-1">เลือกสีระบุโซน</label>
-                      <div className="flex gap-3">
-                         {['#f59e0b', '#3b82f6', '#ef4444', '#10b981', '#8b5cf6'].map(color => (
-                            <button 
-                              key={color}
-                              onClick={() => setTargetDraft({...targetDraft, color})}
-                              className={`w-10 h-10 rounded-full border-4 transition-all ${targetDraft.color === color ? 'border-slate-800 scale-110 shadow-lg' : 'border-transparent shadow-sm'}`}
-                              style={{ backgroundColor: color }}
-                            />
-                         ))}
-                      </div>
-                   </div>
+                    ))}
+                  </div>
                 </div>
+              </div>
 
-                <div className="flex gap-4 pt-4">
-                   <button 
-                    onClick={() => {
-                      if (targetDraft.name) {
-                        addSurveyTarget(targetDraft as SurveyTarget);
-                        setTargetDraft(null);
-                      } else {
-                        alert('กรุณาระบุชื่อพื้นที่');
-                      }
-                    }} 
-                    className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs active:scale-95 transition-all shadow-xl shadow-slate-900/20"
-                   >
-                      บันทึกพื้นที่
-                   </button>
-                   <button 
-                    onClick={() => setTargetDraft(null)} 
-                    className="px-8 bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase text-xs hover:bg-slate-200 transition-colors"
-                   >
-                      ยกเลิก
-                   </button>
-                </div>
-             </div>
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => {
+                    if (targetDraft.name) {
+                      addSurveyTarget(targetDraft as SurveyTarget);
+                      setTargetDraft(null);
+                    } else {
+                      alert('กรุณาระบุชื่อพื้นที่');
+                    }
+                  }}
+                  className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs active:scale-95 transition-all shadow-xl shadow-slate-900/20"
+                >
+                  บันทึกพื้นที่
+                </button>
+                <button
+                  onClick={() => setTargetDraft(null)}
+                  className="px-8 bg-slate-100 text-slate-400 py-4 rounded-2xl font-black uppercase text-xs hover:bg-slate-200 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
