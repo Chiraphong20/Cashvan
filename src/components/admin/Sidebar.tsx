@@ -6,9 +6,8 @@ const navItems = [
   { name: 'หน้าแรก', icon: 'dashboard', path: '/admin' },
   { name: 'Map Overview', icon: 'map', path: '/admin/map' },
   { name: 'จัดการพนักงาน', icon: 'group', path: '/admin/employees' },
-  { name: 'สต็อกสินค้าและคลัง', icon: 'inventory_2', path: '/admin/inventory' },
+  { name: 'คลังสินค้าและสินค้า', icon: 'inventory_2', path: '/admin/inventory' },
   { name: 'รายงานยอดขาย', icon: 'analytics', path: '/admin/sales' },
-  { name: 'จัดการรายการสินค้า', icon: 'category', path: '/admin/products' },
   { name: 'ร้านค้าและผลสำรวจ', icon: 'database', path: '/admin/stores' },
   { name: 'คู่มือการใช้งาน', icon: 'book', path: '/admin/manual' },
 ];

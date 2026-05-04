@@ -18,7 +18,6 @@ import StoreSurvey from './pages/admin/StoreSurvey';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import SurveyAudit from './pages/admin/SurveyAudit';
 import EmployeeManagementPage from './pages/admin/EmployeeManagementPage';
-import ProductManagement from './pages/admin/ProductManagement';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminProfile from './pages/admin/AdminProfile';
 import DigitalCatalog from './pages/driver/DigitalCatalog';
@@ -70,7 +69,7 @@ export default function App() {
             <Route path="stores" element={<StoreSurvey />} />
             <Route path="sales" element={<SalesReports />} />
             <Route path="inventory" element={<Inventory />} />
-            <Route path="products" element={<ProductManagement />} />
+            <Route path="products" element={<Navigate to="/admin/inventory" replace />} />
             <Route path="audit" element={<SurveyAudit />} />
             <Route path="catalog" element={<DigitalCatalog />} />
             <Route path="history" element={<VisitHistory />} />
