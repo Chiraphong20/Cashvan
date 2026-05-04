@@ -51,7 +51,7 @@ export const initDB = async () => {
             `CREATE TABLE IF NOT EXISTS sales (id VARCHAR(50) PRIMARY KEY, store_id VARCHAR(50), driver_id VARCHAR(50), total_amount DECIMAL(10,2), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
             `CREATE TABLE IF NOT EXISTS sale_items (id INT PRIMARY KEY AUTO_INCREMENT, sale_id VARCHAR(50), product_id INT, quantity INT, price DECIMAL(10,2))`,
             `CREATE TABLE IF NOT EXISTS visits (id INT PRIMARY KEY AUTO_INCREMENT, store_id VARCHAR(50), driver_id VARCHAR(50), status VARCHAR(50), photo_url LONGTEXT, notes TEXT, visited_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
-            `CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, phone VARCHAR(20), work_status VARCHAR(20) DEFAULT 'OFFLINE')`,
+            `CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, phone VARCHAR(20), work_status VARCHAR(20) DEFAULT 'OFFLINE', vehicle_plate VARCHAR(50), vehicle_code VARCHAR(50), assigned_zone VARCHAR(100), avatar_url TEXT)`,
             `CREATE TABLE IF NOT EXISTS vehicles (id VARCHAR(50) PRIMARY KEY, plate_number VARCHAR(20) NOT NULL, code VARCHAR(20), status VARCHAR(20) DEFAULT 'AVAILABLE')`,
             `CREATE TABLE IF NOT EXISTS survey_targets (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, lat DOUBLE, lng DOUBLE, radius INT, color VARCHAR(20), status VARCHAR(20) DEFAULT 'ACTIVE')`,
             `CREATE TABLE IF NOT EXISTS stock_transactions (id INT PRIMARY KEY AUTO_INCREMENT, product_id INT, quantity INT, source_location VARCHAR(50), target_location VARCHAR(50), transaction_type VARCHAR(20), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
@@ -100,6 +100,10 @@ export const initDB = async () => {
         const driverColumns = [
             { col: 'phone', type: 'VARCHAR(20)' },
             { col: 'work_status', type: 'VARCHAR(20)' },
+            { col: 'vehicle_plate', type: 'VARCHAR(50)' },
+            { col: 'vehicle_code', type: 'VARCHAR(50)' },
+            { col: 'assigned_zone', type: 'VARCHAR(100)' },
+            { col: 'avatar_url', type: 'TEXT' },
             { col: 'line_user_id', type: 'VARCHAR(100)' },
             { col: 'line_display_name', type: 'VARCHAR(255)' },
             { col: 'line_picture_url', type: 'TEXT' }

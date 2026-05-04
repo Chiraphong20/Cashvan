@@ -730,18 +730,29 @@ app.post('/api/drivers', async (req, res) => {
 
 app.put('/api/drivers/:id', async (req, res) => {
     const { id } = req.params;
-    const fields = req.body;
-    const keys = Object.keys(fields);
-    if (keys.length === 0) return res.status(400).json({ error: 'No fields to update' });
+    const rawFields = req.body;
 
-    const setClause = keys.map(key => `${key} = ?`).join(', ');
+    // Whitelist only columns that exist in the drivers table
+    const ALLOWED_DRIVER_FIELDS = ['name', 'phone', 'work_status', 'vehicle_plate', 'vehicle_code', 'assigned_zone', 'avatar_url', 'line_user_id', 'line_display_name', 'line_picture_url'];
+    const fields: Record<string, any> = {};
+    for (const key of Object.keys(rawFields)) {
+        if (ALLOWED_DRIVER_FIELDS.includes(key)) {
+            fields[key] = rawFields[key];
+        }
+    }
+
+    const keys = Object.keys(fields);
+    if (keys.length === 0) return res.status(400).json({ error: 'No valid fields to update' });
+
+    const setClause = keys.map(key => `\`${key}\` = ?`).join(', ');
     const params = [...Object.values(fields), id];
 
     try {
         await db.query(`UPDATE drivers SET ${setClause} WHERE id = ?`, params);
         res.json({ status: 'success' });
     } catch (error: any) {
-        res.status(500).json({ status: 'error', message: error.message });
+        console.error('❌ PUT /api/drivers error:', error.sqlMessage || error.message);
+        res.status(500).json({ status: 'error', message: error.sqlMessage || error.message });
     }
 });
 

@@ -104,6 +104,7 @@ export default function StoreSurvey() {
 
   // Table Data Filtering
   const filteredData = useMemo(() => {
+    const selectedDriverName = driverFilter ? drivers.find(d => d.id === driverFilter)?.name : null;
     return stores.filter(store => {
       const matchesSearch = !searchTerm || store.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'ALL' || 
@@ -114,11 +115,12 @@ export default function StoreSurvey() {
                              (isCustomerFilter === 'NO' && !store.is_customer);
       const matchesDistrict = !districtFilter || store.district_name === districtFilter;
       const matchesSubDistrict = !subDistrictFilter || store.sub_district_name === subDistrictFilter;
-      const matchesDriver = !driverFilter || store.assigned_driver_id === driverFilter;
+      const matchesDriver = !driverFilter || 
+        (selectedDriverName && store.created_by && store.created_by.toLowerCase().includes(selectedDriverName.toLowerCase()));
       
       return matchesSearch && matchesStatus && matchesCustomer && matchesDistrict && matchesSubDistrict && matchesDriver;
     });
-  }, [stores, searchTerm, statusFilter, isCustomerFilter, districtFilter, subDistrictFilter, driverFilter]);
+  }, [stores, searchTerm, statusFilter, isCustomerFilter, districtFilter, subDistrictFilter, driverFilter, drivers]);
 
   const districtList = useMemo(() => mockDistricts.map(d => d.name_th).sort(), []);
   const subdistrictList = useMemo(() => {
