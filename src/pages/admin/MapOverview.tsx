@@ -152,7 +152,19 @@ export default function MapOverview() {
       const matchesStatus = statusFilter === 'ALL' || (statusFilter === 'SUCCESS' && isSurveyed) || (statusFilter === 'PENDING' && !isSurveyed);
       const matchesDistrict = !districtFilter || store.district_name === districtFilter;
       const matchesSubDistrict = !subDistrictFilter || store.sub_district_name === subDistrictFilter;
-      const matchesDriver = !driverFilter || store.assigned_driver_id === driverFilter;
+      
+      // "ผู้รับผิดชอบ" = คนที่ไปสำรวจ/ปักหมุด
+      // created_by เก็บ "ชื่อพนักงาน" ไม่ใช่ ID — ต้อง lookup ชื่อก่อน
+      const selectedDriverName = driverFilter ? drivers.find(d => d.id === driverFilter)?.name : null;
+      const storeZone = surveyTargets.find(t => t.name === store.sales_zone);
+      const matchesDriver = !driverFilter || 
+                          // เช็คจาก created_by (ชื่อ) เหมือน StoreSurvey.tsx
+                          (selectedDriverName && store.created_by && store.created_by.toLowerCase().includes(selectedDriverName.toLowerCase())) ||
+                          // Fallback: ถ้า assigned โดยตรงด้วย ID
+                          store.assigned_driver_id === driverFilter || 
+                          // Fallback: ถ้า zone ถูก assign ให้ driver นั้น
+                          (storeZone && storeZone.assigned_driver_id === driverFilter);
+                          
       const matchesCustomer = isCustomerFilter === 'ALL' || (isCustomerFilter === 'YES' && store.is_customer) || (isCustomerFilter === 'NO' && !store.is_customer);
 
       const distToWarehouse = L.latLng(store.lat, store.lng).distanceTo(L.latLng(FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng));
@@ -175,7 +187,7 @@ export default function MapOverview() {
 
       return matchesSearch && matchesStatus && matchesDistrict && matchesSubDistrict && matchesDriver && matchesCustomer && matchesDate;
     });
-  }, [stores, searchTerm, statusFilter, districtFilter, subDistrictFilter, driverFilter, isCustomerFilter, warehouseRadius, startDate, endDate]);
+  }, [stores, searchTerm, statusFilter, districtFilter, subDistrictFilter, driverFilter, isCustomerFilter, warehouseRadius, startDate, endDate, surveyTargets]);
 
   return (
     <div className={`fixed inset-0 z-0 transition-all duration-300 ${isCollapsed ? 'pl-20' : 'pl-64'}`}>
@@ -624,6 +636,20 @@ export default function MapOverview() {
                       />
                     ))}
                   </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1">พนักงานที่รับผิดชอบโซนนี้</label>
+                  <select 
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 text-xs font-bold outline-none focus:border-amber-500/30 transition-all"
+                    value={targetDraft.assigned_driver_id || ''}
+                    onChange={e => setTargetDraft({ ...targetDraft, assigned_driver_id: e.target.value })}
+                  >
+                    <option value="">ยังไม่มอบหมายพนักงาน</option>
+                    {drivers.map(d => (
+                      <option key={d.id} value={d.id}>{d.name} ({d.id})</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

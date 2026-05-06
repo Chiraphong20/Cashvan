@@ -188,7 +188,7 @@ app.get('/api/stores', async (req, res) => {
 
         let query = `
             SELECT s.id, s.name, s.address, s.lat, s.lng, s.type, s.status, 
-                   s.is_customer, s.phone, s.created_at, s.created_by,
+                   s.is_customer, s.phone, s.created_at, s.created_by, s.assigned_driver_id,
                    s.verification_status, s.sub_district_id, s.sales_zone,
                    COALESCE(s.sub_district, sd.name_th) as sub_district_name, 
                    COALESCE(s.district, d.name_th) as district_name 
@@ -744,11 +744,26 @@ app.put('/api/drivers/:id', async (req, res) => {
     const keys = Object.keys(fields);
     if (keys.length === 0) return res.status(400).json({ error: 'No valid fields to update' });
 
-    const setClause = keys.map(key => `\`${key}\` = ?`).join(', ');
-    const params = [...Object.values(fields), id];
-
     try {
+        // 1. Fetch old name BEFORE updating (for cascade update)
+        const [oldRows] = await db.query('SELECT name FROM drivers WHERE id = ?', [id]) as any;
+        const oldName = oldRows?.[0]?.name || null;
+        const newName = fields['name'] || null;
+
+        // 2. Update the driver record
+        const setClause = keys.map(key => `\`${key}\` = ?`).join(', ');
+        const params = [...Object.values(fields), id];
         await db.query(`UPDATE drivers SET ${setClause} WHERE id = ?`, params);
+
+        // 3. Cascade: If name changed, update stores.created_by (which stores driver name as string)
+        if (newName && oldName && newName !== oldName) {
+            console.log(`🔄 Cascading name change: "${oldName}" → "${newName}" in stores.created_by`);
+            await db.query(
+                'UPDATE stores SET created_by = ? WHERE created_by = ?',
+                [newName, oldName]
+            );
+        }
+
         res.json({ status: 'success' });
     } catch (error: any) {
         console.error('❌ PUT /api/drivers error:', error.sqlMessage || error.message);

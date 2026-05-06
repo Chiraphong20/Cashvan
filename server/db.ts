@@ -28,9 +28,13 @@ pool.on('connection', (connection) => {
 // Helper function to check if a column exists
 async function columnExists(connection: any, table: string, column: string) {
     try {
-        const [rows] = await connection.query(`SHOW COLUMNS FROM \`${table}\` LIKE ?`, [column]);
+        const [rows] = await connection.query(
+            'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ? AND TABLE_SCHEMA = DATABASE()',
+            [table, column]
+        ) as any;
         return rows.length > 0;
     } catch (e) {
+        console.warn(`⚠️ Error checking if column ${column} exists in ${table}:`, e);
         return false;
     }
 }
@@ -46,14 +50,14 @@ export const initDB = async () => {
             `CREATE TABLE IF NOT EXISTS zones (id INT PRIMARY KEY, name_th TEXT NOT NULL, parent_id INT)`,
             `CREATE TABLE IF NOT EXISTS categories (id INT PRIMARY KEY AUTO_INCREMENT, name TEXT NOT NULL)`,
             `CREATE TABLE IF NOT EXISTS products (id INT PRIMARY KEY AUTO_INCREMENT, name TEXT NOT NULL, sku VARCHAR(50) NOT NULL UNIQUE, category_id INT, price DECIMAL(10,2) NOT NULL)`,
-            `CREATE TABLE IF NOT EXISTS stores (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, address TEXT, lat DOUBLE, lng DOUBLE, type VARCHAR(50), status VARCHAR(50) DEFAULT 'UNSURVEYED', photo_url LONGTEXT)`,
+            `CREATE TABLE IF NOT EXISTS stores (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, address TEXT, lat DOUBLE, lng DOUBLE, type VARCHAR(50), status VARCHAR(50) DEFAULT 'UNSURVEYED', photo_url LONGTEXT, assigned_driver_id VARCHAR(50))`,
             `CREATE TABLE IF NOT EXISTS inventory (id INT PRIMARY KEY AUTO_INCREMENT, product_id INT NOT NULL, quantity INT DEFAULT 0)`,
             `CREATE TABLE IF NOT EXISTS sales (id VARCHAR(50) PRIMARY KEY, store_id VARCHAR(50), driver_id VARCHAR(50), total_amount DECIMAL(10,2), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
             `CREATE TABLE IF NOT EXISTS sale_items (id INT PRIMARY KEY AUTO_INCREMENT, sale_id VARCHAR(50), product_id INT, quantity INT, price DECIMAL(10,2))`,
             `CREATE TABLE IF NOT EXISTS visits (id INT PRIMARY KEY AUTO_INCREMENT, store_id VARCHAR(50), driver_id VARCHAR(50), status VARCHAR(50), photo_url LONGTEXT, notes TEXT, visited_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
             `CREATE TABLE IF NOT EXISTS drivers (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, phone VARCHAR(20), work_status VARCHAR(20) DEFAULT 'OFFLINE', vehicle_plate VARCHAR(50), vehicle_code VARCHAR(50), assigned_zone VARCHAR(100), avatar_url TEXT)`,
             `CREATE TABLE IF NOT EXISTS vehicles (id VARCHAR(50) PRIMARY KEY, plate_number VARCHAR(20) NOT NULL, code VARCHAR(20), status VARCHAR(20) DEFAULT 'AVAILABLE')`,
-            `CREATE TABLE IF NOT EXISTS survey_targets (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, lat DOUBLE, lng DOUBLE, radius INT, color VARCHAR(20), status VARCHAR(20) DEFAULT 'ACTIVE')`,
+            `CREATE TABLE IF NOT EXISTS survey_targets (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, lat DOUBLE, lng DOUBLE, radius INT, color VARCHAR(20), assigned_driver_id VARCHAR(50), status VARCHAR(20) DEFAULT 'ACTIVE')`,
             `CREATE TABLE IF NOT EXISTS stock_transactions (id INT PRIMARY KEY AUTO_INCREMENT, product_id INT, quantity INT, source_location VARCHAR(50), target_location VARCHAR(50), transaction_type VARCHAR(20), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
             `CREATE TABLE IF NOT EXISTS admins (id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50) UNIQUE, password VARCHAR(255), name VARCHAR(255))`
         ];
@@ -65,18 +69,24 @@ export const initDB = async () => {
         // 2. Safe Auto-Heal (Check column by column)
         console.log('🩺 Patching missing columns...');
 
+        const safeAlter = async (table: string, column: string, type: string) => {
+            try {
+                if (!(await columnExists(connection, table, column))) {
+                    await connection.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${type}`);
+                }
+            } catch (err: any) {
+                if (err.code !== 'ER_DUP_FIELDNAME') {
+                    console.error(`❌ Error patching ${table}.${column}:`, err.message);
+                }
+            }
+        };
+
         // Inventory Patches
-        if (!(await columnExists(connection, 'inventory', 'location_id'))) {
-            await connection.query('ALTER TABLE inventory ADD COLUMN location_id VARCHAR(50)');
-        }
-        if (!(await columnExists(connection, 'inventory', 'location_type'))) {
-            await connection.query('ALTER TABLE inventory ADD COLUMN location_type VARCHAR(50)');
-        }
+        await safeAlter('inventory', 'location_id', 'VARCHAR(50)');
+        await safeAlter('inventory', 'location_type', 'VARCHAR(50)');
 
         // Sales Patches
-        if (!(await columnExists(connection, 'sales', 'vehicle_id'))) {
-            await connection.query('ALTER TABLE sales ADD COLUMN vehicle_id VARCHAR(50)');
-        }
+        await safeAlter('sales', 'vehicle_id', 'VARCHAR(50)');
 
         // Stores Patches
         const storeColumns = [
@@ -88,13 +98,15 @@ export const initDB = async () => {
             ['verification_status', 'VARCHAR(50) DEFAULT "PENDING"'],
             ['is_customer', 'BOOLEAN DEFAULT false'],
             ['phone', 'VARCHAR(50)'],
-            ['sales_zone', 'VARCHAR(100)']
+            ['sales_zone', 'VARCHAR(100)'],
+            ['assigned_driver_id', 'VARCHAR(50)']
         ];
         for (const [col, type] of storeColumns) {
-            if (!(await columnExists(connection, 'stores', col))) {
-                await connection.query(`ALTER TABLE stores ADD COLUMN \`${col}\` ${type}`);
-            }
+            await safeAlter('stores', col, type);
         }
+
+        // Survey Targets Patches
+        await safeAlter('survey_targets', 'assigned_driver_id', 'VARCHAR(50)');
 
         // Driver schema update
         const driverColumns = [
@@ -110,10 +122,7 @@ export const initDB = async () => {
         ];
 
         for (const { col, type } of driverColumns) {
-            if (!(await columnExists(connection, 'drivers', col))) {
-                console.log(`  ➕ Adding column ${col} to drivers...`);
-                await connection.query(`ALTER TABLE drivers ADD COLUMN \`${col}\` ${type}`);
-            }
+            await safeAlter('drivers', col, type);
         }
 
         // Upgrade photo_url to LONGTEXT aggressively to prevent truncation of Base64 strings

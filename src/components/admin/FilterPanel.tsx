@@ -26,14 +26,34 @@ interface FilterPanelProps {
 
 export default function FilterPanel(props: FilterPanelProps) {
   const { drivers } = useStoreDB();
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+
+  if (isCollapsed) {
+    return (
+      <button 
+        onClick={() => setIsCollapsed(false)}
+        className="bg-white/95 backdrop-blur-3xl p-4 rounded-full shadow-2xl border border-white/60 pointer-events-auto hover:scale-110 transition-all text-primary flex items-center justify-center animate-in slide-in-from-right-10"
+      >
+        <span className="material-symbols-outlined text-2xl">tune</span>
+      </button>
+    );
+  }
 
   return (
-    <div className="bg-white/95 backdrop-blur-3xl p-5 rounded-[2.5rem] shadow-2xl border border-white/60 space-y-4 animate-in slide-in-from-right-10 duration-700 pointer-events-auto max-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
-      <div className="flex items-center gap-3 mb-1 px-1">
-         <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-            <span className="material-symbols-outlined text-[18px]">tune</span>
+    <div className="bg-white/95 backdrop-blur-3xl p-5 rounded-[2.5rem] shadow-2xl border border-white/60 space-y-4 animate-in slide-in-from-right-10 duration-700 pointer-events-auto max-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar relative">
+      <div className="flex items-center justify-between mb-1 px-1">
+         <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+               <span className="material-symbols-outlined text-[18px]">tune</span>
+            </div>
+            <h3 className="font-black text-[11px] uppercase tracking-[0.2em] text-slate-800">Advanced Controller</h3>
          </div>
-         <h3 className="font-black text-[11px] uppercase tracking-[0.2em] text-slate-800">Advanced Controller</h3>
+         <button 
+           onClick={() => setIsCollapsed(true)}
+           className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 transition-colors"
+         >
+           <span className="material-symbols-outlined text-lg">close_fullscreen</span>
+         </button>
       </div>
 
       {/* 1. Feature Checklist: รัศมีบริการ (xx KM) */}
@@ -72,9 +92,9 @@ export default function FilterPanel(props: FilterPanelProps) {
          <div className="flex bg-slate-100 p-1.5 rounded-2xl border-2 border-slate-200/50">
             {['ALL', 'YES', 'NO'].map(val => (
               <button 
-               key={val}
-               onClick={() => props.setIsCustomerFilter(val)}
-               className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${props.isCustomerFilter === val ? 'bg-white text-primary shadow-lg shadow-black/5 scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                key={val}
+                onClick={() => props.setIsCustomerFilter(val)}
+                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${props.isCustomerFilter === val ? 'bg-white text-primary shadow-lg shadow-black/5 scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 {val === 'ALL' ? 'ทั้งหมด' : val === 'YES' ? 'เป็นลูกค้า' : 'ไม่เป็น'}
               </button>
@@ -178,3 +198,4 @@ export default function FilterPanel(props: FilterPanelProps) {
     </div>
   );
 }
+

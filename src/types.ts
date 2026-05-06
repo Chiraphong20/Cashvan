@@ -22,6 +22,7 @@ export interface Store {
   phone?: string;
   district_name?: string;
   sub_district_name?: string;
+  assigned_driver_id?: string;
 }
 
 export interface Driver {
