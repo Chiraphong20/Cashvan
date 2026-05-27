@@ -119,6 +119,7 @@ export default function MapOverview() {
   const [layerDriverDots, setLayerDriverDots] = useState(true);
   const [layerDistricts, setLayerDistricts] = useState(true);
   const [layerRadius, setLayerRadius] = useState(true);
+  const [layerWarehouse, setLayerWarehouse] = useState(true);
 
   const [newData, setNewData] = useState<any>({
     name: '', address: '', type: 'grocery', status: 'UNSURVEYED',
@@ -370,10 +371,10 @@ export default function MapOverview() {
           })}
 
           {/* Fixed Warehouse & Adjustable Radius */}
-          <Marker position={[FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng]} icon={L.divIcon({
+          {layerWarehouse && <Marker position={[FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng]} icon={L.divIcon({
             html: `<div class="relative flex items-center justify-center"><div class="absolute w-12 h-12 bg-blue-900/20 rounded-full animate-pulse"></div><div class="w-10 h-10 bg-blue-900 text-white rounded-xl shadow-xl flex items-center justify-center border-2 border-white ring-2 ring-blue-900/30"><span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">warehouse</span></div><div class="absolute -bottom-6 bg-blue-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">คลังสินค้านครราชสีมา</div></div>`,
             className: 'warehouse-icon', iconSize: [40, 40], iconAnchor: [20, 20],
-          })} />
+          })} />}
           {layerRadius && <Circle center={[FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng]} radius={warehouseRadius} pathOptions={{ color: '#1e3a8a', fillColor: '#1e3a8a', fillOpacity: 0.05, weight: 1, dashArray: '5, 5' }} interactive={false} />}
 
           {/* Route View Overlay */}
@@ -499,6 +500,7 @@ export default function MapOverview() {
             layerDriverDots={layerDriverDots} setLayerDriverDots={setLayerDriverDots}
             layerDistricts={layerDistricts} setLayerDistricts={setLayerDistricts}
             layerRadius={layerRadius} setLayerRadius={setLayerRadius}
+            layerWarehouse={layerWarehouse} setLayerWarehouse={setLayerWarehouse}
           />
         </div>
 

@@ -7,6 +7,7 @@ interface LayerToggles {
   layerDriverDots: boolean; setLayerDriverDots: (v: boolean) => void;
   layerDistricts: boolean; setLayerDistricts: (v: boolean) => void;
   layerRadius: boolean; setLayerRadius: (v: boolean) => void;
+  layerWarehouse: boolean; setLayerWarehouse: (v: boolean) => void;
 }
 
 interface FilterPanelProps extends LayerToggles {
@@ -26,6 +27,7 @@ const LAYERS = [
   { key: 'layerStores',     icon: 'storefront',     label: 'ร้านค้า' },
   { key: 'layerZones',      icon: 'track_changes',  label: 'โซน' },
   { key: 'layerDriverDots', icon: 'directions_car', label: 'รถสด' },
+  { key: 'layerWarehouse',  icon: 'warehouse',      label: 'โกดัง' },
   { key: 'layerDistricts',  icon: 'map',            label: 'อำเภอ' },
   { key: 'layerRadius',     icon: 'radar',          label: 'รัศมี' },
 ] as const;
@@ -38,12 +40,12 @@ export default function FilterPanel(props: FilterPanelProps) {
   const layerValues: Record<string, boolean> = {
     layerStores: props.layerStores, layerZones: props.layerZones,
     layerDriverDots: props.layerDriverDots, layerDistricts: props.layerDistricts,
-    layerRadius: props.layerRadius,
+    layerRadius: props.layerRadius, layerWarehouse: props.layerWarehouse,
   };
   const layerSetters: Record<string, (v: boolean) => void> = {
     layerStores: props.setLayerStores, layerZones: props.setLayerZones,
     layerDriverDots: props.setLayerDriverDots, layerDistricts: props.setLayerDistricts,
-    layerRadius: props.setLayerRadius,
+    layerRadius: props.setLayerRadius, layerWarehouse: props.setLayerWarehouse,
   };
 
   const activeFiltersCount = [
