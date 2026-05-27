@@ -40,12 +40,27 @@ export default function CheckInMap() {
   const [map, setMap] = useState<L.Map | null>(null);
   const [isLockedToUser, setIsLockedToUser] = useState(true);
 
-  // GPS Trail
+  // GPS Trail — load today's existing trail from server on mount
   const [gpsTrail, setGpsTrail] = useState<[number, number][]>([]);
+  const [trailLoaded, setTrailLoaded] = useState(false);
   const pendingPoints = useRef<{ lat: number; lng: number; recorded_at: string }[]>([]);
 
   useEffect(() => {
-    if (!("geolocation" in navigator)) return;
+    if (!currentDriverId) return;
+    const today = new Date().toISOString().split('T')[0];
+    fetch(`/api/gps-track/${currentDriverId}?date=${today}`)
+      .then(r => r.ok ? r.json() : [])
+      .then((pts: { lat: number; lng: number }[]) => {
+        if (pts.length > 0) {
+          setGpsTrail(pts.map(p => [p.lat, p.lng]));
+        }
+        setTrailLoaded(true);
+      })
+      .catch(() => setTrailLoaded(true));
+  }, [currentDriverId]);
+
+  useEffect(() => {
+    if (!trailLoaded || !("geolocation" in navigator)) return;
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
@@ -88,7 +103,7 @@ export default function CheckInMap() {
       navigator.geolocation.clearWatch(watchId);
       clearInterval(flushInterval);
     };
-  }, [currentDriverId]);
+  }, [currentDriverId, trailLoaded]);
 
   const handleSearch = (val: string) => {
     setSearchTerm(val);
@@ -263,6 +278,41 @@ export default function CheckInMap() {
           />
         )}
 
+        {/* Visited store markers along the trail — แสดงร้านที่เข้าไปแล้ววันนี้ */}
+        {stores.filter(s => s.status === 'SUCCESS' && !s.is_admin_only).map(store => (
+          <Marker
+            key={`visited-${store.id}`}
+            position={[store.lat, store.lng]}
+            icon={L.divIcon({
+              className: 'bg-transparent border-0',
+              html: `
+                <div style="display:flex;flex-direction:column;align-items:center;">
+                  <div style="width:22px;height:22px;background:#10b981;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(16,185,129,0.5);display:flex;align-items:center;justify-content:center;">
+                    <span class="material-symbols-outlined" style="font-size:11px;color:white;font-variation-settings:'FILL' 1;">check</span>
+                  </div>
+                  <div style="background:white;border:1.5px solid #10b981;border-radius:8px;padding:1px 5px;margin-top:2px;box-shadow:0 1px 4px rgba(0,0,0,0.15);max-width:80px;overflow:hidden;">
+                    <span style="font-size:7px;font-weight:900;color:#065f46;white-space:nowrap;display:block;overflow:hidden;text-overflow:ellipsis;">${store.name}</span>
+                  </div>
+                </div>
+              `,
+              iconSize: [80, 38],
+              iconAnchor: [40, 22],
+              popupAnchor: [0, -24],
+            })}
+          >
+            <Popup className="precision-popup">
+              <div className="p-1 min-w-[120px]">
+                <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1">สำรวจแล้ว ✓</p>
+                <h4 className="font-bold text-sm text-slate-800 leading-tight mb-2">{store.name}</h4>
+                <a href={`/driver/sales?storeId=${store.id}`}
+                  className="block w-full text-white text-center py-2 rounded-xl text-[10px] font-black uppercase bg-primary shadow-lg active:scale-95 transition-all">
+                  เปิดเมนูขาย
+                </a>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
         {/* Current Location — รถกำลังเดิน */}
         {userPos && (
           <Marker
@@ -305,9 +355,11 @@ export default function CheckInMap() {
       {/* GPS Trail Status Badge */}
       {gpsTrail.length > 0 && (
         <div className="absolute bottom-32 left-4 z-[1000] bg-white/95 backdrop-blur rounded-2xl px-4 py-2.5 shadow-lg flex items-center gap-2.5 border border-blue-100">
-          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+          <div className={`w-2 h-2 rounded-full bg-blue-500 ${userPos ? 'animate-pulse' : ''}`}></div>
           <div>
-            <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest">กำลังบันทึกเส้นทาง</p>
+            <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest">
+              {userPos ? 'กำลังบันทึกเส้นทาง' : 'เส้นทางล่าสุด (วันนี้)'}
+            </p>
             <p className="text-[10px] font-bold text-slate-600">{gpsTrail.length} จุด</p>
           </div>
         </div>

@@ -113,6 +113,13 @@ export default function MapOverview() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  // Layer Toggles
+  const [layerStores, setLayerStores] = useState(true);
+  const [layerZones, setLayerZones] = useState(true);
+  const [layerDriverDots, setLayerDriverDots] = useState(true);
+  const [layerDistricts, setLayerDistricts] = useState(true);
+  const [layerRadius, setLayerRadius] = useState(true);
+
   const [newData, setNewData] = useState<any>({
     name: '', address: '', type: 'grocery', status: 'UNSURVEYED',
     lat: 14.99954784495029, lng: 102.11866307852294,
@@ -266,10 +273,10 @@ export default function MapOverview() {
           <MapEvents onMapClick={handleMapClick} isDefiningTarget={isDefiningTarget} addMode={addMode} />
 
           {/* District Highlights */}
-          <GeoJSON data={koratGeojson as any} style={(f) => ({ color: getAmphoeColor(f?.properties?.amp_code), weight: 2, opacity: 0.5, fillOpacity: 0.02 })} interactive={false} />
+          {layerDistricts && <GeoJSON data={koratGeojson as any} style={(f: any) => ({ color: getAmphoeColor(f?.properties?.amp_code), weight: 2, opacity: 0.5, fillOpacity: 0.02 })} interactive={false} />}
 
           {/* Store Markers */}
-          {filteredStores.map(store => (
+          {layerStores && filteredStores.map((store: any) => (
             <Marker
               key={store.id}
               position={[store.lat, store.lng]}
@@ -301,7 +308,7 @@ export default function MapOverview() {
           ))}
 
           {/* Live Driver Location Markers */}
-          {driverLocations.map(loc => {
+          {layerDriverDots && driverLocations.map((loc: any) => {
             const driver = drivers.find(d => d.id === loc.driver_id);
             const minutesAgo = Math.round((Date.now() - new Date(loc.updated_at).getTime()) / 60000);
             const isStale = minutesAgo > 5;
@@ -367,7 +374,7 @@ export default function MapOverview() {
             html: `<div class="relative flex items-center justify-center"><div class="absolute w-12 h-12 bg-blue-900/20 rounded-full animate-pulse"></div><div class="w-10 h-10 bg-blue-900 text-white rounded-xl shadow-xl flex items-center justify-center border-2 border-white ring-2 ring-blue-900/30"><span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">warehouse</span></div><div class="absolute -bottom-6 bg-blue-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">คลังสินค้านครราชสีมา</div></div>`,
             className: 'warehouse-icon', iconSize: [40, 40], iconAnchor: [20, 20],
           })} />
-          <Circle center={[FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng]} radius={warehouseRadius} pathOptions={{ color: '#1e3a8a', fillColor: '#1e3a8a', fillOpacity: 0.05, weight: 1, dashArray: '5, 5' }} interactive={false} />
+          {layerRadius && <Circle center={[FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng]} radius={warehouseRadius} pathOptions={{ color: '#1e3a8a', fillColor: '#1e3a8a', fillOpacity: 0.05, weight: 1, dashArray: '5, 5' }} interactive={false} />}
 
           {/* Route View Overlay */}
           {routeMode && routePolyline.length > 1 && (
@@ -413,7 +420,7 @@ export default function MapOverview() {
           })}
 
           {/* Target Zones Overlay */}
-          {surveyTargets.map(target => (
+          {layerZones && surveyTargets.map((target: any) => (
             <React.Fragment key={target.id}>
               <Circle
                 center={[target.lat, target.lng]}
@@ -474,22 +481,25 @@ export default function MapOverview() {
           ))}
         </MapContainer>
 
-        {/* UI Overlays */}
-        <div className="absolute top-6 right-6 z-[1000] flex flex-col items-end gap-4 pointer-events-none w-80">
-          <div className="w-full pointer-events-auto">
-            <FilterPanel
-              searchTerm={searchTerm} setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-              districtFilter={districtFilter} setDistrictFilter={setDistrictFilter}
-              subDistrictFilter={subDistrictFilter} setSubDistrictFilter={setSubDistrictFilter}
-              districtList={districtList} subDistrictList={KORAT_SUBDISTRICTS[districtFilter] || []}
-              driverFilter={driverFilter} setDriverFilter={setDriverFilter}
-              isCustomerFilter={isCustomerFilter} setIsCustomerFilter={setIsCustomerFilter}
-              startDate={startDate} setStartDate={setStartDate}
-              endDate={endDate} setEndDate={setEndDate}
-              warehouseRadius={warehouseRadius} setWarehouseRadius={setWarehouseRadius}
-            />
-          </div>
+        {/* UI Overlays — Top Bar */}
+        <div className="absolute top-0 left-0 right-0 z-[1000] pointer-events-none">
+          <FilterPanel
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+            districtFilter={districtFilter} setDistrictFilter={setDistrictFilter}
+            subDistrictFilter={subDistrictFilter} setSubDistrictFilter={setSubDistrictFilter}
+            districtList={districtList} subDistrictList={KORAT_SUBDISTRICTS[districtFilter] || []}
+            driverFilter={driverFilter} setDriverFilter={setDriverFilter}
+            isCustomerFilter={isCustomerFilter} setIsCustomerFilter={setIsCustomerFilter}
+            startDate={startDate} setStartDate={setStartDate}
+            endDate={endDate} setEndDate={setEndDate}
+            warehouseRadius={warehouseRadius} setWarehouseRadius={setWarehouseRadius}
+            layerStores={layerStores} setLayerStores={setLayerStores}
+            layerZones={layerZones} setLayerZones={setLayerZones}
+            layerDriverDots={layerDriverDots} setLayerDriverDots={setLayerDriverDots}
+            layerDistricts={layerDistricts} setLayerDistricts={setLayerDistricts}
+            layerRadius={layerRadius} setLayerRadius={setLayerRadius}
+          />
         </div>
 
         {/* Map Legend (Bottom Left) - Moved as per request */}
