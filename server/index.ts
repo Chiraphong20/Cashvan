@@ -98,6 +98,84 @@ bootstrap();
 
 // --- API Routes ---
 
+// GPS Track — batch insert points from driver
+app.post('/api/gps-track', async (req, res) => {
+    const { driver_id, points } = req.body;
+    // points: [{ lat, lng, recorded_at }]
+    if (!driver_id || !Array.isArray(points) || points.length === 0) {
+        return res.status(400).json({ error: 'Missing driver_id or points' });
+    }
+    try {
+        const values = points.map((p: any) => [driver_id, p.lat, p.lng, p.recorded_at || new Date()]);
+        await db.query(
+            'INSERT INTO gps_tracks (driver_id, lat, lng, recorded_at) VALUES ?',
+            [values]
+        );
+        res.json({ status: 'ok', saved: points.length });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET today's GPS trail for a driver
+app.get('/api/gps-track/:driver_id', async (req, res) => {
+    const { driver_id } = req.params;
+    const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+    try {
+        const [rows] = await db.query(
+            `SELECT lat, lng, recorded_at FROM gps_tracks
+             WHERE driver_id = ? AND DATE(recorded_at) = ?
+             ORDER BY recorded_at ASC`,
+            [driver_id, date]
+        );
+        res.json(rows);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET all drivers' trails today (admin)
+app.get('/api/gps-tracks', async (req, res) => {
+    const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+    try {
+        const [rows] = await db.query(
+            `SELECT driver_id, lat, lng, recorded_at FROM gps_tracks
+             WHERE DATE(recorded_at) = ?
+             ORDER BY driver_id, recorded_at ASC`,
+            [date]
+        );
+        res.json(rows);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Driver Real-time Location
+app.post('/api/driver-location', async (req, res) => {
+    const { driver_id, lat, lng, accuracy } = req.body;
+    if (!driver_id || lat == null || lng == null) return res.status(400).json({ error: 'Missing fields' });
+    try {
+        await db.execute(
+            `INSERT INTO driver_locations (driver_id, lat, lng, accuracy, updated_at)
+             VALUES (?, ?, ?, ?, NOW())
+             ON DUPLICATE KEY UPDATE lat=?, lng=?, accuracy=?, updated_at=NOW()`,
+            [driver_id, lat, lng, accuracy ?? null, lat, lng, accuracy ?? null]
+        );
+        res.json({ status: 'ok' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/driver-locations', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM driver_locations ORDER BY updated_at DESC');
+        res.json(rows);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Zones
 app.get('/api/zones', async (req, res) => {
     try {

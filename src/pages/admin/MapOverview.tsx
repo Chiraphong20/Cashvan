@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl, GeoJSON, useMapEvents, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, GeoJSON, useMapEvents, Circle, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import { useStoreDB, SurveyTarget } from '../../store/StoreContext';
 import FilterPanel from '../../components/admin/FilterPanel';
@@ -74,8 +74,18 @@ function MapEvents({ onMapClick, isDefiningTarget, addMode }: { onMapClick: (lat
   return null;
 }
 
+const getRouteMarkerIcon = (order: number, isLast: boolean) => {
+  const bg = isLast ? '#f43f5e' : '#3b82f6';
+  return L.divIcon({
+    className: 'bg-transparent border-0',
+    html: `<div style="background:${bg};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);">${order}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+  });
+};
+
 export default function MapOverview() {
-  const { stores, surveyTargets, sales, fetchStoreById, addStore, visits, isCollapsed, addSurveyTarget, deleteSurveyTarget, drivers } = useStoreDB();
+  const { stores, surveyTargets, sales, fetchStoreById, addStore, visits, isCollapsed, addSurveyTarget, deleteSurveyTarget, drivers, driverLocations } = useStoreDB();
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const selectedStore = useMemo(() => stores.find(s => s.id === selectedStoreId), [stores, selectedStoreId]);
 
@@ -109,6 +119,64 @@ export default function MapOverview() {
     district: '', sub_district: '', is_admin_only: false
   });
   const [coordText, setCoordText] = useState('14.999547, 102.118663');
+
+  // GPS Tracks (เส้นทางจริงของรถวันนี้)
+  const [gpsTrackDate, setGpsTrackDate] = useState(new Date().toISOString().split('T')[0]);
+  const [allGpsTracks, setAllGpsTracks] = useState<{ driver_id: string; lat: number; lng: number; recorded_at: string }[]>([]);
+  const [showGpsTracks, setShowGpsTracks] = useState(false);
+
+  const DRIVER_TRAIL_COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+  useEffect(() => {
+    if (!showGpsTracks) return;
+    const fetchTracks = async () => {
+      try {
+        const res = await fetch(`/api/gps-tracks?date=${gpsTrackDate}`);
+        if (res.ok) setAllGpsTracks(await res.json());
+      } catch {}
+    };
+    fetchTracks();
+    const id = setInterval(fetchTracks, 15000);
+    return () => clearInterval(id);
+  }, [showGpsTracks, gpsTrackDate]);
+
+  const gpsTrailsByDriver = useMemo(() => {
+    const map: Record<string, [number, number][]> = {};
+    allGpsTracks.forEach(p => {
+      if (!map[p.driver_id]) map[p.driver_id] = [];
+      map[p.driver_id].push([p.lat, p.lng]);
+    });
+    return map;
+  }, [allGpsTracks]);
+
+  // Route View (check-in history)
+  const [routeMode, setRouteMode] = useState(false);
+  const [routeDriverId, setRouteDriverId] = useState('');
+  const [routeDate, setRouteDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const routePath = useMemo(() => {
+    if (!routeMode || !routeDriverId) return [];
+    const dayStart = new Date(routeDate + 'T00:00:00').getTime();
+    const dayEnd = new Date(routeDate + 'T23:59:59').getTime();
+    return visits
+      .filter(v => v.driver_id === routeDriverId &&
+        new Date(v.visited_at).getTime() >= dayStart &&
+        new Date(v.visited_at).getTime() <= dayEnd)
+      .sort((a, b) => new Date(a.visited_at).getTime() - new Date(b.visited_at).getTime())
+      .map(v => {
+        const store = stores.find(s => s.id === v.store_id);
+        return store ? { ...v, store } : null;
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null);
+  }, [routeMode, routeDriverId, routeDate, visits, stores]);
+
+  const routePolyline = useMemo(() => {
+    if (routePath.length === 0) return [];
+    return [
+      [FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng] as [number, number],
+      ...routePath.map(r => [r.store.lat, r.store.lng] as [number, number])
+    ];
+  }, [routePath]);
 
   const getStoresInTarget = (target: SurveyTarget) => {
     return stores.filter(store => {
@@ -232,12 +300,117 @@ export default function MapOverview() {
             </Marker>
           ))}
 
+          {/* Live Driver Location Markers */}
+          {driverLocations.map(loc => {
+            const driver = drivers.find(d => d.id === loc.driver_id);
+            const minutesAgo = Math.round((Date.now() - new Date(loc.updated_at).getTime()) / 60000);
+            const isStale = minutesAgo > 5;
+            return (
+              <Marker
+                key={loc.driver_id}
+                position={[loc.lat, loc.lng]}
+                icon={L.divIcon({
+                  className: 'bg-transparent border-0',
+                  html: `
+                    <div style="position:relative;display:flex;align-items:center;justify-content:center;">
+                      ${!isStale ? `<div style="position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(16,185,129,0.25);animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>` : ''}
+                      <div style="width:28px;height:28px;background:${isStale ? '#94a3b8' : '#10b981'};border-radius:50%;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+                        <span class="material-symbols-outlined" style="font-size:14px;color:white;font-variation-settings:'FILL' 1;">directions_car</span>
+                      </div>
+                      <div style="position:absolute;bottom:-22px;background:${isStale ? '#94a3b8' : '#10b981'};color:white;font-size:9px;font-weight:900;padding:2px 6px;border-radius:10px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.2);">
+                        ${driver?.name || loc.driver_id}
+                      </div>
+                    </div>
+                  `,
+                  iconSize: [28, 28],
+                  iconAnchor: [14, 14],
+                })}
+              >
+                <Popup className="precision-popup">
+                  <div className="p-3 min-w-[180px] font-body">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className={`w-3 h-3 rounded-full ${isStale ? 'bg-slate-300' : 'bg-emerald-500 animate-pulse'}`}></div>
+                      <p className="font-black text-sm text-slate-800">{driver?.name || loc.driver_id}</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-slate-400 font-bold uppercase">สถานะ</span>
+                        <span className={`font-black ${isStale ? 'text-slate-400' : 'text-emerald-600'}`}>
+                          {isStale ? `สัญญาณล่าช้า ${minutesAgo} นาที` : 'Online (ตำแหน่งสด)'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-slate-400 font-bold uppercase">อัปเดตล่าสุด</span>
+                        <span className="font-black text-slate-700">{new Date(loc.updated_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.</span>
+                      </div>
+                      {loc.accuracy && (
+                        <div className="flex justify-between text-[10px]">
+                          <span className="text-slate-400 font-bold uppercase">ความแม่นยำ GPS</span>
+                          <span className="font-black text-slate-700">±{Math.round(loc.accuracy)} ม.</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-slate-400 font-bold uppercase">พิกัด</span>
+                        <a href={`https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`} target="_blank" rel="noopener noreferrer" className="font-black text-blue-600 underline">
+                          {loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
           {/* Fixed Warehouse & Adjustable Radius */}
           <Marker position={[FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng]} icon={L.divIcon({
             html: `<div class="relative flex items-center justify-center"><div class="absolute w-12 h-12 bg-blue-900/20 rounded-full animate-pulse"></div><div class="w-10 h-10 bg-blue-900 text-white rounded-xl shadow-xl flex items-center justify-center border-2 border-white ring-2 ring-blue-900/30"><span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">warehouse</span></div><div class="absolute -bottom-6 bg-blue-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">คลังสินค้านครราชสีมา</div></div>`,
             className: 'warehouse-icon', iconSize: [40, 40], iconAnchor: [20, 20],
           })} />
           <Circle center={[FIXED_WAREHOUSE.lat, FIXED_WAREHOUSE.lng]} radius={warehouseRadius} pathOptions={{ color: '#1e3a8a', fillColor: '#1e3a8a', fillOpacity: 0.05, weight: 1, dashArray: '5, 5' }} interactive={false} />
+
+          {/* Route View Overlay */}
+          {routeMode && routePolyline.length > 1 && (
+            <Polyline positions={routePolyline} pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '12, 6' }} />
+          )}
+          {routeMode && routePath.map((r, idx) => (
+            <Marker
+              key={r.id}
+              position={[r.store.lat, r.store.lng]}
+              icon={getRouteMarkerIcon(idx + 1, idx === routePath.length - 1)}
+            >
+              <Popup className="precision-popup">
+                <div className="p-2 min-w-[160px] font-body">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-black ${idx === routePath.length - 1 ? 'bg-rose-500' : 'bg-blue-500'}`}>{idx + 1}</div>
+                    <h3 className="font-black text-sm text-slate-800">{r.store.name}</h3>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-bold">{new Date(r.visited_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.</p>
+                  {idx === routePath.length - 1 && <p className="text-[10px] font-black text-rose-500 mt-1">จุดสิ้นสุดเส้นทาง</p>}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+          {/* GPS Trails (เส้นทางจริงของรถ) */}
+          {showGpsTracks && Object.entries(gpsTrailsByDriver).map(([driverId, trail]: [string, [number, number][]], idx) => {
+            const color = DRIVER_TRAIL_COLORS[idx % DRIVER_TRAIL_COLORS.length];
+            const driver = drivers.find(d => d.id === driverId);
+            return trail.length > 1 ? (
+              <Polyline
+                key={driverId}
+                positions={trail}
+                pathOptions={{ color, weight: 4, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }}
+              >
+                <Popup className="precision-popup">
+                  <div className="p-2 font-body text-center">
+                    <p className="text-[10px] font-black text-slate-800">{driver?.name || driverId}</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">{trail.length} จุด GPS</p>
+                  </div>
+                </Popup>
+              </Polyline>
+            ) : null;
+          })}
 
           {/* Target Zones Overlay */}
           {surveyTargets.map(target => (
@@ -339,6 +512,114 @@ export default function MapOverview() {
         </div>
 
         <div className="absolute top-24 left-4 z-[1000] flex flex-col gap-2">
+          <button
+            onClick={() => setRouteMode(!routeMode)}
+            className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${routeMode ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
+          >
+            <span className="material-symbols-outlined text-lg">route</span>
+            ดูเส้นทางสำรวจ
+          </button>
+
+          {routeMode && (
+            <div className="bg-white rounded-3xl shadow-2xl p-5 w-64 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <p className="text-[10px] font-black uppercase text-blue-600 tracking-widest flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">route</span>
+                Route View Mode
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black text-slate-400 uppercase">พนักงาน</label>
+                <select
+                  className="w-full bg-slate-50 rounded-xl p-2.5 text-xs font-bold outline-none border-2 border-slate-100 focus:border-blue-300"
+                  value={routeDriverId}
+                  onChange={e => setRouteDriverId(e.target.value)}
+                >
+                  <option value="">-- เลือกพนักงาน --</option>
+                  {drivers.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black text-slate-400 uppercase">วันที่</label>
+                <input
+                  type="date"
+                  className="w-full bg-slate-50 rounded-xl p-2.5 text-xs font-bold outline-none border-2 border-slate-100 focus:border-blue-300"
+                  value={routeDate}
+                  onChange={e => setRouteDate(e.target.value)}
+                />
+              </div>
+              {routeDriverId && (
+                <div className="bg-blue-50 rounded-2xl p-3 border border-blue-100">
+                  {routePath.length === 0 ? (
+                    <p className="text-[10px] font-bold text-slate-400 text-center">ไม่พบการเช็คอินในวันนี้</p>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-blue-900 rounded-lg flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[12px] text-white">warehouse</span>
+                        </div>
+                        <span className="text-[10px] font-black text-slate-700">โกดังสินค้า (จุดเริ่ม)</span>
+                      </div>
+                      {routePath.map((r, idx) => (
+                        <div key={r.id} className="flex items-center gap-2">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-black ${idx === routePath.length - 1 ? 'bg-rose-500' : 'bg-blue-500'}`}>{idx + 1}</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-black text-slate-700 truncate">{r.store.name}</p>
+                            <p className="text-[9px] text-slate-400">{new Date(r.visited_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.</p>
+                          </div>
+                          {idx === routePath.length - 1 && (
+                            <span className="text-[8px] font-black text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded-full whitespace-nowrap">จุดสิ้นสุด</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowGpsTracks(!showGpsTracks)}
+            className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${showGpsTracks ? 'bg-blue-500 text-white' : 'bg-white text-slate-700'}`}
+          >
+            <span className="material-symbols-outlined text-lg">directions_car</span>
+            เส้นทาง GPS
+          </button>
+
+          {showGpsTracks && (
+            <div className="bg-white rounded-3xl shadow-2xl p-5 w-64 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+              <p className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">route</span>
+                GPS Trail Mode
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-[9px] font-black text-slate-400 uppercase">วันที่</label>
+                <input
+                  type="date"
+                  className="w-full bg-slate-50 rounded-xl p-2.5 text-xs font-bold outline-none border-2 border-slate-100 focus:border-blue-300"
+                  value={gpsTrackDate}
+                  onChange={e => setGpsTrackDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                {Object.entries(gpsTrailsByDriver).length === 0 ? (
+                  <p className="text-[10px] font-bold text-slate-400 text-center py-2">ไม่พบข้อมูล GPS ในวันนี้</p>
+                ) : Object.entries(gpsTrailsByDriver).map(([driverId, trail]: [string, [number, number][]], idx) => {
+                  const color = DRIVER_TRAIL_COLORS[idx % DRIVER_TRAIL_COLORS.length];
+                  const driver = drivers.find(d => d.id === driverId);
+                  return (
+                    <div key={driverId} className="flex items-center gap-2 py-1">
+                      <div className="w-4 h-2 rounded-full" style={{ backgroundColor: color }}></div>
+                      <span className="text-[10px] font-black text-slate-700 flex-1 truncate">{driver?.name || driverId}</span>
+                      <span className="text-[9px] font-bold text-slate-400">{trail.length} จุด</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <button onClick={() => setIsDefiningTarget(!isDefiningTarget)} className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${isDefiningTarget ? 'bg-amber-500 text-white animate-pulse' : 'bg-white text-slate-700'}`}>
             <span className="material-symbols-outlined text-lg">track_changes</span>
             ปักพื้นที่เป้าหมาย

@@ -1,5 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Store, Sale, VanInventory, Visit, SaleItem, Driver, Zone, Product, Category } from '../types';
+
+export interface DriverLocation {
+  id: number;
+  driver_id: string;
+  lat: number;
+  lng: number;
+  accuracy: number | null;
+  updated_at: string;
+}
 
 export interface SurveyTarget {
   id: string;
@@ -43,6 +52,7 @@ interface StoreContextType {
   isCollapsed: boolean;
   setIsCollapsed: (val: boolean) => void;
   surveyTargets: SurveyTarget[];
+  driverLocations: DriverLocation[];
   addSurveyTarget: (target: Partial<SurveyTarget>) => Promise<void>;
   deleteSurveyTarget: (id: string) => Promise<void>;
   addProduct: (product: any) => Promise<void>;
@@ -67,6 +77,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [surveyTargets, setSurveyTargets] = useState<SurveyTarget[]>([]);
+  const [driverLocations, setDriverLocations] = useState<DriverLocation[]>([]);
+  const locationPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentDriverId, setDriverId] = useState<string>(localStorage.getItem('driver_id') || 'd1');
   const [currentVehicleId, setVehicleId] = useState<string>(localStorage.getItem('vehicle_id') || '');
@@ -190,18 +202,34 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const fetchDriverLocations = useCallback(async () => {
+    try {
+      const response = await fetch('/api/driver-locations');
+      if (response.ok) setDriverLocations(await response.json());
+    } catch (error) {}
+  }, []);
+
   // Initial Load
   useEffect(() => {
     const init = async () => {
       setLoading(true);
       await Promise.all([
-        fetchStores(), fetchSales(), fetchInventory(''), fetchZones(), 
+        fetchStores(), fetchSales(), fetchInventory(''), fetchZones(),
         fetchProductsAndCategories(), fetchDrivers(), fetchVehicles(), fetchSurveyTargets(), fetchVisits()
       ]);
       setLoading(false);
     };
     init();
   }, [fetchInventory]);
+
+  // Poll driver locations every 30s (admin needs live view)
+  useEffect(() => {
+    fetchDriverLocations();
+    locationPollRef.current = setInterval(fetchDriverLocations, 30000);
+    return () => {
+      if (locationPollRef.current) clearInterval(locationPollRef.current);
+    };
+  }, [fetchDriverLocations]);
 
   // Actions
   const addStore = async (store: Store) => {
@@ -421,7 +449,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <StoreContext.Provider value={{
-      stores, sales, inventories, visits, zones, products, categories, drivers, surveyTargets,
+      stores, sales, inventories, visits, zones, products, categories, drivers, surveyTargets, driverLocations,
       loading, currentDriverId, currentVehicleId, setDriverId, setVehicleId, vehicles,
       addStore, updateStore, deleteStore, addDriver, updateDriver, deleteDriver,
       recordSale, deleteSale, addVisit, transferStock, closeDay, returnStock,

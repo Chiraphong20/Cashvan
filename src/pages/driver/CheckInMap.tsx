@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useStoreDB } from '../../store/StoreContext';
 
@@ -40,16 +40,55 @@ export default function CheckInMap() {
   const [map, setMap] = useState<L.Map | null>(null);
   const [isLockedToUser, setIsLockedToUser] = useState(true);
 
+  // GPS Trail
+  const [gpsTrail, setGpsTrail] = useState<[number, number][]>([]);
+  const pendingPoints = useRef<{ lat: number; lng: number; recorded_at: string }[]>([]);
+
   useEffect(() => {
-    if ("geolocation" in navigator) {
-      const watchId = navigator.geolocation.watchPosition(
-        (pos) => setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => console.error(err),
-        { enableHighAccuracy: true }
-      );
-      return () => navigator.geolocation.clearWatch(watchId);
-    }
-  }, []);
+    if (!("geolocation" in navigator)) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setUserPos({ lat, lng });
+        setGpsTrail(prev => {
+          // Skip if moved less than 5m (avoid duplicates while stationary)
+          if (prev.length > 0) {
+            const [prevLat, prevLng] = prev[prev.length - 1];
+            const dLat = (lat - prevLat) * 111000;
+            const dLng = (lng - prevLng) * 111000 * Math.cos(lat * Math.PI / 180);
+            if (Math.sqrt(dLat * dLat + dLng * dLng) < 5) return prev;
+          }
+          return [...prev, [lat, lng]];
+        });
+        pendingPoints.current.push({ lat, lng, recorded_at: new Date().toISOString() });
+      },
+      (err) => console.error(err),
+      { enableHighAccuracy: true, distanceFilter: 5 } as any
+    );
+
+    // Flush GPS points to server every 10 seconds
+    const flushInterval = setInterval(async () => {
+      if (pendingPoints.current.length === 0 || !currentDriverId) return;
+      const toSend = [...pendingPoints.current];
+      pendingPoints.current = [];
+      try {
+        await fetch('/api/gps-track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ driver_id: currentDriverId, points: toSend })
+        });
+      } catch {
+        // Put points back if send failed
+        pendingPoints.current = [...toSend, ...pendingPoints.current];
+      }
+    }, 10000);
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+      clearInterval(flushInterval);
+    };
+  }, [currentDriverId]);
 
   const handleSearch = (val: string) => {
     setSearchTerm(val);
@@ -216,19 +255,30 @@ export default function CheckInMap() {
           );
         })}
 
-        {/* Current Location Marker */}
+        {/* GPS Trail Polyline */}
+        {gpsTrail.length > 1 && (
+          <Polyline
+            positions={gpsTrail}
+            pathOptions={{ color: '#3b82f6', weight: 4, opacity: 0.85, lineCap: 'round', lineJoin: 'round' }}
+          />
+        )}
+
+        {/* Current Location — รถกำลังเดิน */}
         {userPos && (
           <Marker
             position={[userPos.lat, userPos.lng]}
             icon={L.divIcon({
               className: 'bg-transparent border-0',
               html: `
-                <div class="relative flex items-center justify-center">
-                  <div class="absolute w-12 h-12 bg-primary/20 rounded-full animate-ping"></div>
-                  <div class="absolute w-6 h-6 bg-primary/30 rounded-full"></div>
-                  <div class="w-4 h-4 bg-primary border-2 border-white rounded-full shadow-2xl"></div>
+                <div style="position:relative;display:flex;align-items:center;justify-content:center;">
+                  <div style="position:absolute;width:48px;height:48px;border-radius:50%;background:rgba(59,130,246,0.2);animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>
+                  <div style="width:36px;height:36px;background:#1d4ed8;border-radius:50%;border:3px solid white;box-shadow:0 3px 12px rgba(29,78,216,0.5);display:flex;align-items:center;justify-content:center;">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:white;font-variation-settings:'FILL' 1;">directions_car</span>
+                  </div>
                 </div>
-              `
+              `,
+              iconSize: [36, 36],
+              iconAnchor: [18, 18],
             })}
           />
         )}
@@ -252,6 +302,17 @@ export default function CheckInMap() {
           ))}
       </MapContainer>
 
+      {/* GPS Trail Status Badge */}
+      {gpsTrail.length > 0 && (
+        <div className="absolute bottom-32 left-4 z-[1000] bg-white/95 backdrop-blur rounded-2xl px-4 py-2.5 shadow-lg flex items-center gap-2.5 border border-blue-100">
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+          <div>
+            <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest">กำลังบันทึกเส้นทาง</p>
+            <p className="text-[10px] font-bold text-slate-600">{gpsTrail.length} จุด</p>
+          </div>
+        </div>
+      )}
+
       {/* Floating GPS Recenter Button */}
       {userPos && (
         <button
@@ -261,6 +322,8 @@ export default function CheckInMap() {
           <span className="material-symbols-outlined">my_location</span>
         </button>
       )}
+
+      <style>{`@keyframes ping { 75%,100%{transform:scale(2);opacity:0} }`}</style>
     </div>
   );
 }

@@ -17,6 +17,32 @@ export default function DriverLayout() {
     }
   }, [currentDriver, setDriverId]);
 
+  // Ping GPS every 30s while driver is logged in
+  React.useEffect(() => {
+    if (!currentDriver?.id || !navigator.geolocation) return;
+    const ping = () => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          fetch('/api/driver-location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              driver_id: currentDriver.id,
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+              accuracy: pos.coords.accuracy
+            })
+          }).catch(() => {});
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 15000 }
+      );
+    };
+    ping();
+    const id = setInterval(ping, 30000);
+    return () => clearInterval(id);
+  }, [currentDriver?.id]);
+
   const activeTab = location.pathname.includes('/stores') ? 'stores' : 
                     location.pathname.includes('/stock') ? 'stock' : 'map';
 

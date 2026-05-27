@@ -59,7 +59,10 @@ export const initDB = async () => {
             `CREATE TABLE IF NOT EXISTS vehicles (id VARCHAR(50) PRIMARY KEY, plate_number VARCHAR(20) NOT NULL, code VARCHAR(20), status VARCHAR(20) DEFAULT 'AVAILABLE')`,
             `CREATE TABLE IF NOT EXISTS survey_targets (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, lat DOUBLE, lng DOUBLE, radius INT, color VARCHAR(20), assigned_driver_id VARCHAR(50), status VARCHAR(20) DEFAULT 'ACTIVE')`,
             `CREATE TABLE IF NOT EXISTS stock_transactions (id INT PRIMARY KEY AUTO_INCREMENT, product_id INT, quantity INT, source_location VARCHAR(50), target_location VARCHAR(50), transaction_type VARCHAR(20), created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
-            `CREATE TABLE IF NOT EXISTS admins (id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50) UNIQUE, password VARCHAR(255), name VARCHAR(255))`
+            `CREATE TABLE IF NOT EXISTS admins (id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50) UNIQUE, password VARCHAR(255), name VARCHAR(255))`,
+            `CREATE TABLE IF NOT EXISTS driver_locations (id INT PRIMARY KEY AUTO_INCREMENT, driver_id VARCHAR(50) NOT NULL, lat DOUBLE NOT NULL, lng DOUBLE NOT NULL, accuracy FLOAT, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, UNIQUE KEY unique_driver (driver_id))`,
+            `CREATE TABLE IF NOT EXISTS trips (id VARCHAR(50) PRIMARY KEY, driver_id VARCHAR(50) NOT NULL, vehicle_id VARCHAR(50), vehicle_plate VARCHAR(50), crew_count INT DEFAULT 1, crew_names TEXT, departure_time DATETIME NOT NULL, return_time DATETIME, status VARCHAR(20) DEFAULT 'ACTIVE', planned_store_count INT DEFAULT 0, notes TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+            `CREATE TABLE IF NOT EXISTS gps_tracks (id INT PRIMARY KEY AUTO_INCREMENT, driver_id VARCHAR(50) NOT NULL, lat DOUBLE NOT NULL, lng DOUBLE NOT NULL, recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP, INDEX idx_driver_date (driver_id, recorded_at))`
         ];
 
         for (const sql of tableQueries) {
