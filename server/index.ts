@@ -450,7 +450,7 @@ app.get('/api/visits', async (req, res) => {
             query += ' WHERE driver_id = ?';
             params.push(driver_id);
         }
-        query += ' ORDER BY created_at DESC';
+        query += ' ORDER BY id DESC';
 
         const [visits] = await db.query(query, params);
         res.json(visits);

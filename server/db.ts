@@ -128,6 +128,11 @@ export const initDB = async () => {
             await safeAlter('drivers', col, type);
         }
 
+        // Visits Patches
+        await safeAlter('visits', 'visited_at', 'DATETIME DEFAULT CURRENT_TIMESTAMP');
+        await safeAlter('visits', 'notes', 'TEXT');
+        await safeAlter('visits', 'driver_id', 'VARCHAR(50)');
+
         // Upgrade photo_url to LONGTEXT aggressively to prevent truncation of Base64 strings
         try {
             await connection.query('ALTER TABLE stores MODIFY photo_url LONGTEXT');
