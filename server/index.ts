@@ -256,6 +256,69 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
+// Import the real catalog from the line-commerce POS system (pos.products) into the local
+// products/categories/inventory tables, so it becomes the master catalog used for van loading.
+// Safe to re-run: existing products (matched by pos_product_id) only get their catalog info
+// refreshed — their MASTER stock quantity is left untouched since it's tracked independently
+// in Cashvan once loading onto vans begins.
+app.post('/api/products/sync-from-pos', async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [posProducts] = await connection.query(
+            'SELECT id, barcode, name, category, retailPrice, wholesalePrice, unit, stock, image FROM pos.products'
+        ) as any;
+
+        const [existingCats] = await connection.query('SELECT id, name FROM categories') as any;
+        const catMap = new Map<string, number>(existingCats.map((c: any) => [c.name, c.id]));
+
+        let newProducts = 0;
+        let updatedProducts = 0;
+
+        for (const p of posProducts) {
+            const catName = p.category || 'ไม่มีหมวดหมู่';
+            let categoryId = catMap.get(catName);
+            if (!categoryId) {
+                const [result] = await connection.execute('INSERT INTO categories (name) VALUES (?)', [catName]) as any;
+                categoryId = result.insertId;
+                catMap.set(catName, categoryId);
+            }
+
+            const [existing] = await connection.query(
+                'SELECT id FROM products WHERE pos_product_id = ?',
+                [p.id]
+            ) as any;
+
+            if (existing.length > 0) {
+                await connection.execute(
+                    'UPDATE products SET name = ?, sku = ?, barcode = ?, category_id = ?, price = ?, wholesale_price = ?, unit = ?, image = ? WHERE id = ?',
+                    [p.name, p.id, p.barcode || null, categoryId, p.retailPrice || 0, p.wholesalePrice || 0, p.unit || 'ชิ้น', p.image || null, existing[0].id]
+                );
+                updatedProducts++;
+            } else {
+                const [result] = await connection.execute(
+                    'INSERT INTO products (name, sku, barcode, category_id, price, wholesale_price, unit, image, pos_product_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [p.name, p.id, p.barcode || null, categoryId, p.retailPrice || 0, p.wholesalePrice || 0, p.unit || 'ชิ้น', p.image || null, p.id]
+                ) as any;
+                await connection.execute(
+                    'INSERT INTO inventory (product_id, quantity, location_type, location_id) VALUES (?, ?, "MASTER", "")',
+                    [result.insertId, p.stock || 0]
+                );
+                newProducts++;
+            }
+        }
+
+        await connection.commit();
+        res.json({ status: 'success', newProducts, updatedProducts, total: posProducts.length });
+    } catch (error: any) {
+        await connection.rollback();
+        res.status(500).json({ status: 'error', message: error.message });
+    } finally {
+        connection.release();
+    }
+});
+
 // Stores
 app.get('/api/stores', async (req, res) => {
     try {

@@ -42,6 +42,11 @@ export interface Product {
   sku: string;
   category_id: number;
   price: number;
+  wholesale_price?: number;
+  unit?: string;
+  image?: string;
+  barcode?: string;
+  pos_product_id?: string;
 }
 
 export interface Category {

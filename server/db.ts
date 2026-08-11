@@ -91,6 +91,18 @@ export const initDB = async () => {
         // Sales Patches
         await safeAlter('sales', 'vehicle_id', 'VARCHAR(50)');
 
+        // Products Patches — support importing the real catalog from the line-commerce POS system (pos.products)
+        await safeAlter('products', 'wholesale_price', 'DECIMAL(10,2) DEFAULT 0');
+        await safeAlter('products', 'unit', 'VARCHAR(20) DEFAULT "ชิ้น"');
+        await safeAlter('products', 'image', 'LONGTEXT');
+        await safeAlter('products', 'barcode', 'VARCHAR(100)');
+        await safeAlter('products', 'pos_product_id', 'VARCHAR(50)');
+        try {
+            await connection.query('ALTER TABLE products ADD UNIQUE INDEX idx_pos_product_id (pos_product_id)');
+        } catch (e: any) {
+            if (e.code !== 'ER_DUP_KEYNAME') console.warn('⚠️ Could not add idx_pos_product_id:', e.message);
+        }
+
         // Stores Patches
         const storeColumns = [
             ['sub_district', 'VARCHAR(100)'],

@@ -3,7 +3,7 @@ import { useStoreDB } from '../../store/StoreContext';
 import { Product } from '../../types';
 
 export default function Inventory() {
-  const { inventories, products, categories, vehicles, transferStock, fetchInventory, addProduct, updateInventory, updateProduct, deleteProduct } = useStoreDB() as any;
+  const { inventories, products, categories, vehicles, transferStock, fetchInventory, addProduct, updateInventory, updateProduct, deleteProduct, fetchProductsAndCategories } = useStoreDB() as any;
   const [activeTab, setActiveTab] = useState<'vans' | 'master' | 'catalog' | 'pos'>('vans');
 
   // POS (line-commerce) reference stock — read-only, fetched directly, not part of StoreContext
@@ -12,6 +12,30 @@ export default function Inventory() {
   const [posTotal, setPosTotal] = useState(0);
   const [posLoading, setPosLoading] = useState(false);
   const POS_PAGE_SIZE = 50;
+
+  // Import real catalog from POS into the local products/inventory tables
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncFromPos = async () => {
+    if (!confirm('นำเข้าสินค้าจากระบบ POS (line-commerce) เข้าเป็นคลังหลักของ Cashvan?\n\nสินค้าใหม่จะถูกเพิ่มพร้อมสต็อกตั้งต้นจาก POS ส่วนสินค้าที่เคยนำเข้าแล้วจะอัปเดตแค่ชื่อ/ราคา/หน่วย (สต็อกที่มีอยู่แล้วในคลังจะไม่ถูกแก้ไข)')) return;
+    setIsSyncing(true);
+    try {
+      const res = await fetch('/api/products/sync-from-pos', { method: 'POST' });
+      const data = await res.json();
+      if (data.status === 'success') {
+        alert(`นำเข้าสำเร็จ!\nสินค้าใหม่: ${data.newProducts} รายการ\nอัปเดตข้อมูล: ${data.updatedProducts} รายการ\nรวมทั้งหมดจาก POS: ${data.total} รายการ`);
+        await fetchProductsAndCategories();
+        await fetchInventory('');
+      } else {
+        alert(`นำเข้าไม่สำเร็จ: ${data.message}`);
+      }
+    } catch (err) {
+      console.error('Error syncing from POS:', err);
+      alert('เกิดข้อผิดพลาดระหว่างนำเข้าข้อมูล');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
   const [selectedVehicle, setSelectedVehicle] = useState('V-01');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -213,6 +237,14 @@ export default function Inventory() {
               ))}
             </div>
             <button
+              onClick={handleSyncFromPos}
+              disabled={isSyncing}
+              className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl shadow-slate-900/10 flex items-center gap-2 disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined">sync</span>
+              {isSyncing ? 'กำลังนำเข้า...' : 'นำเข้าสินค้าจาก POS'}
+            </button>
+            <button
               onClick={handleCatalogAdd}
               className="bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl shadow-primary/20 flex items-center gap-2"
             >
@@ -227,7 +259,9 @@ export default function Inventory() {
                 <tr className="bg-slate-50/50">
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคา</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หน่วย</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาปลีก</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาส่ง</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">จัดการ</th>
                 </tr>
               </thead>
@@ -238,8 +272,12 @@ export default function Inventory() {
                     <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="px-8 py-6 border-b border-slate-50">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all">
-                            <span className="material-symbols-outlined">shopping_bag</span>
+                          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all overflow-hidden">
+                            {product.image ? (
+                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="material-symbols-outlined">shopping_bag</span>
+                            )}
                           </div>
                           <div>
                             <p className="font-black text-on-surface">{product.name}</p>
@@ -253,7 +291,13 @@ export default function Inventory() {
                         </span>
                       </td>
                       <td className="px-8 py-6 border-b border-slate-50">
+                        <p className="font-bold text-slate-500 text-sm">{product.unit || 'ชิ้น'}</p>
+                      </td>
+                      <td className="px-8 py-6 border-b border-slate-50">
                         <p className="font-black text-emerald-600">฿{Number(product.price).toFixed(2)}</p>
+                      </td>
+                      <td className="px-8 py-6 border-b border-slate-50">
+                        <p className="font-black text-slate-500">฿{Number(product.wholesale_price || 0).toFixed(2)}</p>
                       </td>
                       <td className="px-8 py-6 border-b border-slate-50 text-right">
                         <div className="flex justify-end gap-2">
@@ -495,7 +539,7 @@ export default function Inventory() {
                                  </span>
                               </td>
                               <td className="px-8 py-6">
-                                 <p className="font-black text-slate-800">{masterStock} <small className="text-slate-400">ชิ้น</small></p>
+                                 <p className="font-black text-slate-800">{masterStock} <small className="text-slate-400">{p.unit || 'ชิ้น'}</small></p>
                               </td>
                               <td className="px-8 py-6">
                                  <button 
