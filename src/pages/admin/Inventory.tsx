@@ -4,7 +4,14 @@ import { Product } from '../../types';
 
 export default function Inventory() {
   const { inventories, products, categories, vehicles, transferStock, fetchInventory, addProduct, updateInventory, updateProduct, deleteProduct } = useStoreDB() as any;
-  const [activeTab, setActiveTab] = useState<'vans' | 'master' | 'catalog'>('vans');
+  const [activeTab, setActiveTab] = useState<'vans' | 'master' | 'catalog' | 'pos'>('vans');
+
+  // POS (line-commerce) reference stock — read-only, fetched directly, not part of StoreContext
+  const [posSearch, setPosSearch] = useState('');
+  const [posItems, setPosItems] = useState<any[]>([]);
+  const [posTotal, setPosTotal] = useState(0);
+  const [posLoading, setPosLoading] = useState(false);
+  const POS_PAGE_SIZE = 50;
   const [selectedVehicle, setSelectedVehicle] = useState('V-01');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -37,6 +44,25 @@ export default function Inventory() {
       fetchInventory(''); // MASTER
     }
   }, [selectedVehicle, activeTab, fetchInventory]);
+
+  // Fetch POS reference stock when the tab is opened or the search term changes (debounced)
+  React.useEffect(() => {
+    if (activeTab !== 'pos') return;
+    setPosLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/pos-products?search=${encodeURIComponent(posSearch)}&limit=${POS_PAGE_SIZE}`);
+        const data = await res.json();
+        setPosItems(data.items || []);
+        setPosTotal(data.total || 0);
+      } catch (err) {
+        console.error('Error fetching POS reference stock:', err);
+      } finally {
+        setPosLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [activeTab, posSearch]);
 
   const toggleProductSelection = (id: number) => {
     setSelectedProductIds(prev => 
@@ -141,11 +167,17 @@ export default function Inventory() {
           >
             Refill Center
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('catalog')}
             className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'catalog' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             จัดการสินค้า
+          </button>
+          <button
+            onClick={() => setActiveTab('pos')}
+            className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pos' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            คลัง POS (อ้างอิง)
           </button>
         </div>
       </div>
@@ -238,6 +270,81 @@ export default function Inventory() {
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      ) : activeTab === 'pos' ? (
+        <div className="space-y-6">
+          <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-6 py-4 rounded-2xl flex items-center gap-3">
+            <span className="material-symbols-outlined text-lg">info</span>
+            แสดงข้อมูลสต็อกจากระบบ line-commerce (POS) เพื่อใช้อ้างอิงเท่านั้น — แก้ไขไม่ได้จากหน้านี้
+          </div>
+          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <div className="relative max-w-md">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
+              <input
+                type="text"
+                placeholder="ค้นหาด้วยชื่อ หรือ บาร์โค้ด..."
+                className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-4 py-4 text-sm font-bold outline-none focus:ring-2 ring-primary/20"
+                value={posSearch}
+                onChange={(e) => setPosSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาขายปลีก</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">สต็อก (POS)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {posItems.map((item: any) => (
+                  <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-8 py-6 border-b border-slate-50">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 overflow-hidden">
+                          {item.image ? (
+                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="material-symbols-outlined">shopping_bag</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-black text-on-surface">{item.name}</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Barcode: {item.barcode || '-'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 border-b border-slate-50">
+                      <span className="px-4 py-2 bg-slate-100 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                        {item.category || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6 border-b border-slate-50">
+                      <p className="font-black text-emerald-600">฿{Number(item.retailPrice || 0).toFixed(2)}</p>
+                    </td>
+                    <td className="px-8 py-6 border-b border-slate-50 text-right">
+                      <p className="font-black text-slate-800">{item.stock} <small className="text-slate-400">{item.unit || 'ชิ้น'}</small></p>
+                    </td>
+                  </tr>
+                ))}
+                {!posLoading && posItems.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="py-20 text-center opacity-30">
+                      <span className="material-symbols-outlined text-6xl">inventory_2</span>
+                      <p className="font-black uppercase tracking-[0.2em] text-xs mt-4">ไม่พบสินค้า</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <div className="px-8 py-5 border-t border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              {posLoading ? 'กำลังโหลด...' : `แสดง ${posItems.length} จากทั้งหมด ${posTotal.toLocaleString()} รายการ`}
+            </div>
           </div>
         </div>
       ) : activeTab === 'vans' ? (

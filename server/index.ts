@@ -500,6 +500,32 @@ app.get('/api/inventory', async (req, res) => {
     }
 });
 
+// Read-only reference: live stock from the line-commerce POS system (pos.products).
+// Same MySQL server, different database — Cashvan only ever reads this, never writes.
+app.get('/api/pos-products', async (req, res) => {
+    try {
+        const search = String(req.query.search || '').trim();
+        const limit = Math.min(parseInt(String(req.query.limit || '50')) || 50, 200);
+        const offset = parseInt(String(req.query.offset || '0')) || 0;
+
+        const whereClause = search ? ' WHERE name LIKE ? OR barcode LIKE ?' : '';
+        const searchParams = search ? [`%${search}%`, `%${search}%`] : [];
+
+        const [items] = await db.query(
+            `SELECT id, barcode, name, category, stock, unit, retailPrice, image FROM pos.products${whereClause} ORDER BY name ASC LIMIT ? OFFSET ?`,
+            [...searchParams, limit, offset]
+        );
+        const [countRows] = await db.query(
+            `SELECT COUNT(*) as total FROM pos.products${whereClause}`,
+            searchParams
+        ) as any;
+
+        res.json({ items, total: countRows[0].total });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
 app.put('/api/inventory', async (req, res) => {
     const { product_id, location_id, quantity, location_type } = req.body;
     try {
