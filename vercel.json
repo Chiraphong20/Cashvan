@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://cashvan.onrender.com/api/$1"
+      "destination": "https://cashvan-api.168-144-103-192.sslip.io/api/$1"
     },
     {
       "source": "/(.*)",
