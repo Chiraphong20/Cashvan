@@ -40,15 +40,15 @@ export default function ProductManagement() {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-700">
-      <div className="flex justify-between items-end">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-4xl font-black text-on-surface tracking-tighter">Product Catalog</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-on-surface tracking-tighter">Product Catalog</h1>
           <p className="text-slate-400 font-bold mt-2 uppercase tracking-widest text-xs">Manage your master product list</p>
         </div>
-        <button 
+        <button
           onClick={handleAdd}
-          className="bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl shadow-primary/20 flex items-center gap-2"
+          className="bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2"
         >
           <span className="material-symbols-outlined">add</span>
           เพิ่มสินค้าใหม่
@@ -67,8 +67,8 @@ export default function ProductManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex gap-2">
-          <button 
+        <div className="flex gap-2 flex-wrap">
+          <button
             onClick={() => setSelectedCategory('all')}
             className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedCategory === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
           >
@@ -87,14 +87,14 @@ export default function ProductManagement() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-x-auto">
+        <table className="w-full text-left min-w-[600px]">
           <thead>
             <tr className="bg-slate-50/50">
-              <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
-              <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
-              <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคา</th>
-              <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">จัดการ</th>
+              <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
+              <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
+              <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคา</th>
+              <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">จัดการ</th>
             </tr>
           </thead>
           <tbody>
@@ -141,14 +141,14 @@ export default function ProductManagement() {
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
+           <div className="bg-white rounded-[2rem] md:rounded-[3rem] w-full max-w-lg p-6 md:p-10 shadow-2xl space-y-6 md:space-y-8 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
               <div>
-                 <h3 className="text-3xl font-black text-slate-900 tracking-tighter">
+                 <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">
                    {modalOpen === 'add' ? 'เพิ่มสินค้าใหม่' : 'แก้ไขข้อมูลสินค้า'}
                  </h3>
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                 <div className="col-span-2 space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                 <div className="sm:col-span-2 space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ชื่อสินค้า</label>
                     <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
                  </div>
@@ -160,7 +160,7 @@ export default function ProductManagement() {
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ราคา (฿)</label>
                     <input type="number" value={form.price} onChange={e => setForm({...form, price: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
                  </div>
-                 <div className="col-span-2 space-y-2">
+                 <div className="sm:col-span-2 space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">หมวดหมู่</label>
                     <select value={form.category_id} onChange={e => setForm({...form, category_id: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20">
                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}

@@ -172,34 +172,34 @@ export default function Inventory() {
   }, [products, searchQuery]);
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-700 pb-32">
-      <div className="flex justify-between items-end">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-in fade-in duration-700 pb-32">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4">
         <div>
-          <h1 className="text-4xl font-black text-on-surface tracking-tighter">Stock Operations</h1>
+          <h1 className="text-2xl md:text-4xl font-black text-on-surface tracking-tighter">Stock Operations</h1>
           <p className="text-slate-400 font-bold mt-2 uppercase tracking-widest text-xs">Manage Distribution & Van Refills</p>
         </div>
-        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-[2rem]">
-          <button 
+        <div className="flex gap-2 bg-slate-100 p-1.5 rounded-[2rem] flex-wrap">
+          <button
             onClick={() => setActiveTab('vans')}
-            className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'vans' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 md:px-8 py-2 md:py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'vans' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             Monitor Vans
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('master')}
-            className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'master' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 md:px-8 py-2 md:py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'master' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             Refill Center
           </button>
           <button
             onClick={() => setActiveTab('catalog')}
-            className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'catalog' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 md:px-8 py-2 md:py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'catalog' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             จัดการสินค้า
           </button>
           <button
             onClick={() => setActiveTab('pos')}
-            className={`px-8 py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pos' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-4 md:px-8 py-2 md:py-3 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'pos' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             คลัง POS (อ้างอิง)
           </button>
@@ -219,7 +219,7 @@ export default function Inventory() {
                 onChange={(e) => setCatalogSearch(e.target.value)}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setSelectedCategory('all')}
                 className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedCategory === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
@@ -253,16 +253,16 @@ export default function Inventory() {
             </button>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-            <table className="w-full text-left">
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-x-auto">
+            <table className="w-full text-left min-w-[720px]">
               <thead>
                 <tr className="bg-slate-50/50">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หน่วย</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาปลีก</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาส่ง</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">จัดการ</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หน่วย</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาปลีก</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาส่ง</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">จัดการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -335,14 +335,14 @@ export default function Inventory() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-            <table className="w-full text-left">
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-x-auto">
+            <table className="w-full text-left min-w-[600px]">
               <thead>
                 <tr className="bg-slate-50/50">
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาขายปลีก</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">สต็อก (POS)</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ข้อมูลสินค้า</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">หมวดหมู่</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ราคาขายปลีก</th>
+                  <th className="px-4 md:px-8 py-4 md:py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">สต็อก (POS)</th>
                 </tr>
               </thead>
               <tbody>
@@ -394,13 +394,13 @@ export default function Inventory() {
       ) : activeTab === 'vans' ? (
         <div className="space-y-6">
            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
-              <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+              <div className="p-4 md:p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-slate-50/30">
                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                    <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
                        <span className="material-symbols-outlined">local_shipping</span>
                     </div>
                     <div>
-                       <select 
+                       <select
                          className="bg-transparent border-none text-xl font-black text-slate-900 outline-none cursor-pointer p-0"
                          value={selectedVehicle}
                          onChange={e => setSelectedVehicle(e.target.value)}
@@ -410,18 +410,18 @@ export default function Inventory() {
                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Stock in Vehicle</p>
                     </div>
                  </div>
-                 <div className="relative">
-                    <input 
-                      type="text" 
-                      placeholder="Search items in van..." 
-                      className="bg-white border border-slate-100 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold outline-none ring-primary/20 focus:ring-2 w-64 shadow-sm"
+                 <div className="relative w-full sm:w-64">
+                    <input
+                      type="text"
+                      placeholder="Search items in van..."
+                      className="bg-white border border-slate-100 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold outline-none ring-primary/20 focus:ring-2 w-full shadow-sm"
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                     />
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-sm">search</span>
                  </div>
               </div>
-              <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {currentVanStock.map((inv: any) => {
                     const p = products.find((prod: any) => prod.id === inv.product_id);
                     return (
@@ -483,8 +483,8 @@ export default function Inventory() {
                </button>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden transition-all duration-500">
-               <table className="w-full text-left">
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-x-auto transition-all duration-500">
+               <table className="w-full text-left min-w-[700px]">
                   <thead>
                      <tr className="bg-slate-50 border-b border-slate-100">
                         <th className="px-8 py-6 w-16">
@@ -565,17 +565,17 @@ export default function Inventory() {
       {/* Catalog Modal (Add/Edit Product) */}
       {catalogModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[4000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-[2rem] md:rounded-[3rem] w-full max-w-lg p-6 md:p-10 shadow-2xl space-y-6 md:space-y-8 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center">
-              <h3 className="text-3xl font-black text-slate-900 tracking-tighter">
+              <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">
                 {catalogModal === 'add' ? 'เพิ่มสินค้าใหม่' : 'แก้ไขข้อมูลสินค้า'}
               </h3>
               <button onClick={() => setCatalogModal(null)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="col-span-2 space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+              <div className="sm:col-span-2 space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ชื่อสินค้า</label>
                 <input type="text" value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
               </div>
@@ -587,7 +587,7 @@ export default function Inventory() {
                 <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ราคา (฿)</label>
                 <input type="number" value={productForm.price} onChange={e => setProductForm({...productForm, price: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
               </div>
-              <div className="col-span-2 space-y-2">
+              <div className="sm:col-span-2 space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase ml-1">หมวดหมู่</label>
                 <select value={productForm.category_id} onChange={e => setProductForm({...productForm, category_id: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20">
                   {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -605,15 +605,15 @@ export default function Inventory() {
       {/* New Product Modal (from Refill Center) */}
       {isAddingProduct && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[4000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-w-lg p-10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
+           <div className="bg-white rounded-[2rem] md:rounded-[3rem] w-full max-w-lg p-6 md:p-10 shadow-2xl space-y-6 md:space-y-8 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center">
-                 <h3 className="text-3xl font-black text-slate-900 tracking-tighter">เพิ่มสินค้าใหม่</h3>
+                 <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">เพิ่มสินค้าใหม่</h3>
                  <button onClick={() => setIsAddingProduct(false)} className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
                     <span className="material-symbols-outlined">close</span>
                  </button>
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                 <div className="col-span-2 space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                 <div className="sm:col-span-2 space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ชื่อสินค้า</label>
                     <input type="text" placeholder="เช่น น้ำดื่มสิงห์ 600ml" value={newProductForm.name} onChange={e => setNewProductForm({...newProductForm, name: e.target.value})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
                  </div>
@@ -625,7 +625,7 @@ export default function Inventory() {
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">ราคาขาย (฿)</label>
                     <input type="number" placeholder="0.00" value={newProductForm.price} onChange={e => setNewProductForm({...newProductForm, price: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20" />
                  </div>
-                 <div className="col-span-2 space-y-2">
+                 <div className="sm:col-span-2 space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase ml-1">หมวดหมู่</label>
                     <select value={newProductForm.category_id} onChange={e => setNewProductForm({...newProductForm, category_id: Number(e.target.value)})} className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold outline-none focus:ring-2 ring-primary/20">
                        {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -643,7 +643,7 @@ export default function Inventory() {
       {/* Editing Stock Modal */}
       {editingInventory && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[3000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+           <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] w-full max-w-md p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
                  <div>
                     <h3 className="text-xl font-black text-slate-800 leading-none">ปรับปรุงจำนวนสต็อก</h3>
@@ -694,10 +694,10 @@ export default function Inventory() {
 
       {/* Floating Refill Control Bar */}
       {selectedProductIds.length > 0 && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[2000] w-[90%] max-w-5xl animate-in slide-in-from-bottom-10 h-24">
-           <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-4 pr-6 flex items-center shadow-2xl h-full backdrop-blur-xl">
-              <div className="flex items-center gap-6 px-4 border-r border-white/10">
-                 <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-lg">
+        <div className="fixed bottom-4 lg:bottom-10 left-1/2 -translate-x-1/2 z-[2000] w-[95%] sm:w-[90%] max-w-5xl animate-in slide-in-from-bottom-10">
+           <div className="bg-slate-900 border border-white/10 rounded-[2rem] lg:rounded-[2.5rem] p-4 lg:pr-6 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-0 shadow-2xl backdrop-blur-xl max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center gap-4 lg:gap-6 lg:px-4 lg:border-r border-white/10 shrink-0">
+                 <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-lg shrink-0">
                     {selectedProductIds.length}
                  </div>
                  <div>
@@ -706,11 +706,11 @@ export default function Inventory() {
                  </div>
               </div>
 
-              <div className="flex-1 flex px-8 gap-8 items-center">
-                 <div className="space-y-1">
+              <div className="flex-1 flex flex-col sm:flex-row lg:px-8 gap-4 lg:gap-8 sm:items-center">
+                 <div className="space-y-1 flex-1">
                     <label className="text-[9px] font-black text-slate-500 uppercase ml-1">โอนลงรถทะเบียน</label>
-                    <select 
-                      className="bg-white/5 border-none text-white font-black text-xs outline-none cursor-pointer focus:ring-1 ring-primary/30 p-2 rounded-xl min-w-[200px]"
+                    <select
+                      className="w-full bg-white/5 border-none text-white font-black text-xs outline-none cursor-pointer focus:ring-1 ring-primary/30 p-2 rounded-xl lg:min-w-[200px]"
                       value={transferTargetVehicle}
                       onChange={e => setTransferTargetVehicle(e.target.value)}
                     >
@@ -720,13 +720,13 @@ export default function Inventory() {
                  <div className="space-y-1">
                     <label className="text-[9px] font-black text-slate-500 uppercase ml-1">จำนวนต่อรายการ</label>
                     <div className="flex items-center gap-3">
-                       <input 
-                        type="number" 
-                        className="bg-white/5 border-none text-white font-black text-xl outline-none w-24 p-2 rounded-xl focus:ring-1 ring-primary/30"
+                       <input
+                        type="number"
+                        className="bg-white/5 border-none text-white font-black text-xl outline-none w-full sm:w-24 p-2 rounded-xl focus:ring-1 ring-primary/30"
                         value={bulkQuantity}
                         onChange={e => setBulkQuantity(parseInt(e.target.value) || 0)}
                        />
-                       <div className="flex gap-1">
+                       <div className="flex gap-1 shrink-0">
                           <button onClick={() => setBulkQuantity(q => q + 50)} className="text-[9px] p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white">+</button>
                           <button onClick={() => setBulkQuantity(q => Math.max(0, q - 50))} className="text-[9px] p-2 bg-white/5 rounded-lg text-slate-400 hover:text-white">-</button>
                        </div>
@@ -734,10 +734,10 @@ export default function Inventory() {
                  </div>
               </div>
 
-              <button 
+              <button
                 onClick={handleBulkTransfer}
                 disabled={isTransferring}
-                className="bg-primary hover:bg-primary-hover text-white px-10 py-5 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
+                className="w-full lg:w-auto bg-primary hover:bg-primary-hover text-white px-10 py-4 lg:py-5 rounded-[1.5rem] font-black uppercase tracking-widest text-[11px] shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shrink-0"
               >
                  {isTransferring ? 'กำลังโอนย้าย...' : 'ยืนยันการเติมสินค้าลงรถ'}
                  <span className="material-symbols-outlined text-sm">local_shipping</span>

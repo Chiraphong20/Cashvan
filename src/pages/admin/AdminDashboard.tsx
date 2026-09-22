@@ -124,7 +124,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="overflow-x-auto max-h-[500px] custom-scrollbar">
-            <table className="w-full">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest sticky top-0 z-10">
                 <tr>
                   <th className="px-8 py-4 text-left">ชื่ออำเภอ</th>

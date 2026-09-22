@@ -266,7 +266,7 @@ export default function MapOverview() {
   }, [stores, searchTerm, statusFilter, districtFilter, subDistrictFilter, driverFilter, isCustomerFilter, warehouseRadius, startDate, endDate, surveyTargets]);
 
   return (
-    <div className={`fixed inset-0 z-0 transition-all duration-300 ${isCollapsed ? 'pl-20' : 'pl-64'}`}>
+    <div className={`fixed inset-x-0 bottom-0 top-14 lg:top-0 z-0 transition-all duration-300 ${isCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
       <div className="w-full h-full relative">
         <MapContainer center={[14.9995, 102.1186]} zoom={12} zoomControl={false} className="h-full w-full">
           <TileLayer url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" subdomains={['mt0', 'mt1', 'mt2', 'mt3']} />
@@ -505,8 +505,8 @@ export default function MapOverview() {
         </div>
 
         {/* Map Legend (Bottom Left) - Moved as per request */}
-        <div className="absolute bottom-6 left-6 z-[1000] pointer-events-auto w-72">
-          <div className="bg-white/80 backdrop-blur-2xl rounded-[2.5rem] p-6 shadow-2xl border border-white/50 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:bottom-6 sm:left-6 z-[1000] pointer-events-auto sm:w-72">
+          <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 shadow-2xl border border-white/50 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 px-1">Map Legend (คำอธิบายหมุด)</h4>
             <div className="grid grid-cols-2 gap-y-3 gap-x-4">
               <LegendItem icon="check" label="สำรวจแล้ว" color="bg-secondary" isCircular />
@@ -523,17 +523,17 @@ export default function MapOverview() {
           </div>
         </div>
 
-        <div className="absolute top-24 left-4 z-[1000] flex flex-col gap-2">
+        <div className="absolute top-16 lg:top-24 left-4 z-[1000] flex flex-col gap-2 max-w-[calc(100vw-2rem)]">
           <button
             onClick={() => setRouteMode(!routeMode)}
-            className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${routeMode ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${routeMode ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
           >
             <span className="material-symbols-outlined text-lg">route</span>
-            ดูเส้นทางสำรวจ
+            <span className="hidden sm:inline">ดูเส้นทางสำรวจ</span>
           </button>
 
           {routeMode && (
-            <div className="bg-white rounded-3xl shadow-2xl p-5 w-64 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="bg-white rounded-3xl shadow-2xl p-5 w-64 max-w-[calc(100vw-2rem)] space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
               <p className="text-[10px] font-black uppercase text-blue-600 tracking-widest flex items-center gap-1">
                 <span className="material-symbols-outlined text-sm">route</span>
                 Route View Mode
@@ -593,14 +593,14 @@ export default function MapOverview() {
 
           <button
             onClick={() => setShowGpsTracks(!showGpsTracks)}
-            className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${showGpsTracks ? 'bg-blue-500 text-white' : 'bg-white text-slate-700'}`}
+            className={`flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${showGpsTracks ? 'bg-blue-500 text-white' : 'bg-white text-slate-700'}`}
           >
             <span className="material-symbols-outlined text-lg">directions_car</span>
-            เส้นทาง GPS
+            <span className="hidden sm:inline">เส้นทาง GPS</span>
           </button>
 
           {showGpsTracks && (
-            <div className="bg-white rounded-3xl shadow-2xl p-5 w-64 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="bg-white rounded-3xl shadow-2xl p-5 w-64 max-w-[calc(100vw-2rem)] space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
               <p className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-1">
                 <span className="material-symbols-outlined text-sm">route</span>
                 GPS Trail Mode
@@ -632,23 +632,23 @@ export default function MapOverview() {
             </div>
           )}
 
-          <button onClick={() => setIsDefiningTarget(!isDefiningTarget)} className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${isDefiningTarget ? 'bg-amber-500 text-white animate-pulse' : 'bg-white text-slate-700'}`}>
+          <button onClick={() => setIsDefiningTarget(!isDefiningTarget)} className={`flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${isDefiningTarget ? 'bg-amber-500 text-white animate-pulse' : 'bg-white text-slate-700'}`}>
             <span className="material-symbols-outlined text-lg">track_changes</span>
-            ปักพื้นที่เป้าหมาย
+            <span className="hidden sm:inline">ปักพื้นที่เป้าหมาย</span>
           </button>
           <button onClick={() => {
             setNewData({ ...newData, name: '', is_admin_only: false, lat: 14.999547, lng: 102.118663, status: 'UNSURVEYED' });
             setIsAdding(true);
-          }} className={`flex items-center gap-2 px-6 py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${addMode ? 'bg-[#f43f5e] text-white animate-pulse' : 'bg-white text-slate-700'}`}>
+          }} className={`flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-3xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${addMode ? 'bg-[#f43f5e] text-white animate-pulse' : 'bg-white text-slate-700'}`}>
             <span className="material-symbols-outlined text-lg">add_location_alt</span>
-            เพิ่มร้านใหม่ {addMode && '(กำลังเลือกหมุด...)'}
+            <span className="hidden sm:inline">เพิ่มร้านใหม่ {addMode && '(กำลังเลือกหมุด...)'}</span>
           </button>
         </div>
 
         {/* Modals & Slide-overs */}
         {selectedStore && (
-          <div className="absolute inset-y-0 right-0 w-96 bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.1)] z-[2000] animate-in slide-in-from-right duration-500 flex flex-col">
-            <div className="p-8 pb-4 flex justify-between items-center">
+          <div className="absolute inset-y-0 right-0 w-full sm:w-96 bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.1)] z-[2000] animate-in slide-in-from-right duration-500 flex flex-col">
+            <div className="p-6 sm:p-8 pb-4 flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
                   <span className="material-symbols-outlined font-variation-fill">storefront</span>
@@ -663,7 +663,7 @@ export default function MapOverview() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-8 py-4 space-y-8">
+            <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-4 space-y-8">
               {/* Visual Status */}
               <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100">
                 <div className="flex flex-col items-center text-center">
@@ -749,8 +749,8 @@ export default function MapOverview() {
 
         {/* Sales History Overlay */}
         {showSalesHistory && selectedStore && (
-          <div className="absolute inset-y-0 right-0 w-[450px] bg-slate-50 shadow-[-30px_0_60px_rgba(0,0,0,0.2)] z-[3000] animate-in slide-in-from-right duration-500 flex flex-col border-l border-white/20">
-            <div className="p-8 pb-4 flex justify-between items-center bg-white border-b border-slate-100">
+          <div className="absolute inset-y-0 right-0 w-full sm:w-[450px] bg-slate-50 shadow-[-30px_0_60px_rgba(0,0,0,0.2)] z-[3000] animate-in slide-in-from-right duration-500 flex flex-col border-l border-white/20">
+            <div className="p-6 sm:p-8 pb-4 flex justify-between items-center bg-white border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20">
                   <span className="material-symbols-outlined text-2xl">receipt_long</span>
@@ -813,8 +813,8 @@ export default function MapOverview() {
 
         {isAdding && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[2.5rem] w-full max-w-lg p-8 shadow-2xl space-y-6">
-              <h3 className="text-2xl font-black text-on-surface tracking-tighter">เพิ่มข้อมูลร้านค้าใหม่</h3>
+            <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] w-full max-w-lg p-4 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-xl sm:text-2xl font-black text-on-surface tracking-tighter">เพิ่มข้อมูลร้านค้าใหม่</h3>
               <input type="text" placeholder="ชื่อร้านค้า" className="w-full bg-slate-50 p-4 rounded-xl font-bold outline-none border-2 border-slate-100" value={newData.name} onChange={e => setNewData({ ...newData, name: e.target.value })} />
 
               <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border-2 border-slate-100">
@@ -874,7 +874,7 @@ export default function MapOverview() {
         {/* Target Area Configuration Modal */}
         {targetDraft && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[3rem] w-full max-w-md p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
+            <div className="bg-white rounded-[2rem] sm:rounded-[3rem] w-full max-w-md p-4 sm:p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center gap-4 mb-2">
                 <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
                   <span className="material-symbols-outlined text-2xl">track_changes</span>

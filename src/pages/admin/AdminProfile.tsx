@@ -49,15 +49,15 @@ export default function AdminProfile() {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-700">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-in fade-in duration-700">
       <div>
-        <h1 className="text-4xl font-black text-on-surface tracking-tighter">Admin Profile</h1>
+        <h1 className="text-2xl md:text-4xl font-black text-on-surface tracking-tighter">Admin Profile</h1>
         <p className="text-slate-400 font-bold mt-2 uppercase tracking-widest text-xs">Manage your account settings</p>
       </div>
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden max-w-2xl">
-        <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center gap-6">
-           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black">
+        <div className="p-4 sm:p-8 border-b border-slate-50 bg-slate-50/50 flex items-center gap-4 sm:gap-6">
+           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-black shrink-0">
               {currentAdmin?.name?.charAt(0).toUpperCase() || 'A'}
            </div>
            <div>
@@ -66,7 +66,7 @@ export default function AdminProfile() {
            </div>
         </div>
 
-        <form onSubmit={handleUpdate} className="p-8 space-y-6">
+        <form onSubmit={handleUpdate} className="p-4 sm:p-8 space-y-6">
           {message.text && (
             <div className={`p-4 rounded-2xl text-sm font-bold flex items-center gap-2 ${message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
               <span className="material-symbols-outlined">{message.type === 'error' ? 'error' : 'check_circle'}</span>

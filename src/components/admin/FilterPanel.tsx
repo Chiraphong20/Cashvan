@@ -75,10 +75,10 @@ export default function FilterPanel(props: FilterPanelProps) {
   return (
     <div ref={panelRef} className="pointer-events-auto">
       {/* ── Top Bar ── */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-xl shadow-lg border-b border-slate-100/80">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-xl shadow-lg border-b border-slate-100/80 overflow-x-auto">
 
         {/* Layer toggles */}
-        <div className="flex items-center gap-1 pr-3 border-r border-slate-200">
+        <div className="flex items-center gap-1 pr-3 border-r border-slate-200 shrink-0">
           {LAYERS.map(({ key, icon, label }) => {
             const isOn = layerValues[key];
             return (
@@ -104,7 +104,7 @@ export default function FilterPanel(props: FilterPanelProps) {
 
         {/* Radius slider (compact) */}
         {props.layerRadius && (
-          <div className="flex items-center gap-2 px-3 border-r border-slate-200">
+          <div className="flex items-center gap-2 px-3 border-r border-slate-200 shrink-0">
             <span className="material-symbols-outlined text-slate-400 text-[16px]">radar</span>
             <input
               type="range" min="1000" max="50000" step="1000"
@@ -117,7 +117,7 @@ export default function FilterPanel(props: FilterPanelProps) {
         )}
 
         {/* Search */}
-        <div className="relative flex-1 max-w-xs">
+        <div className="relative shrink-0 w-44 sm:w-auto sm:flex-1 sm:max-w-xs">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[16px]">search</span>
           <input
             type="text"
@@ -136,7 +136,7 @@ export default function FilterPanel(props: FilterPanelProps) {
         {/* Filter dropdown button */}
         <button
           onClick={() => setFiltersOpen(!filtersOpen)}
-          className={`relative flex items-center gap-2 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${
+          className={`relative flex items-center gap-2 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all shrink-0 ${
             filtersOpen || activeFiltersCount > 0
               ? 'bg-slate-900 text-white'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -154,7 +154,7 @@ export default function FilterPanel(props: FilterPanelProps) {
         {/* Reset (show when filters active) */}
         {activeFiltersCount > 0 && (
           <button onClick={resetFilters} title="ล้างตัวกรอง"
-            className="flex items-center justify-center w-8 h-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors">
+            className="flex items-center justify-center w-8 h-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors shrink-0">
             <span className="material-symbols-outlined text-[16px]">restart_alt</span>
           </button>
         )}

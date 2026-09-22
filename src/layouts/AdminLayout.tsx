@@ -107,6 +107,7 @@ export default function AdminLayout() {
   const { currentAdmin, loading: authLoading } = useAdminAuth();
   const location = useLocation();
   const [showContent, setShowContent] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const dataReady = !authLoading && !dataLoading;
 
@@ -128,9 +129,23 @@ export default function AdminLayout() {
         className="flex min-h-screen bg-background font-body text-on-surface antialiased overflow-x-hidden"
         style={{ opacity: showContent ? 1 : 0, transition: 'opacity 0.4s ease' }}
       >
-        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-        <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
-          <main className="flex-1 p-8 space-y-8">
+        <Sidebar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        />
+        <div className={`flex-1 min-w-0 flex flex-col min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+          <header className="lg:hidden sticky top-0 z-[1500] bg-white/90 backdrop-blur-xl border-b border-slate-100 flex items-center gap-3 px-4 h-14">
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            <span className="text-sm font-black text-blue-900 font-headline truncate">ระบบจัดการ Cashvan</span>
+          </header>
+          <main className="flex-1 min-w-0 p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8">
             <div className="max-w-[1600px] mx-auto w-full">
               <Outlet />
             </div>

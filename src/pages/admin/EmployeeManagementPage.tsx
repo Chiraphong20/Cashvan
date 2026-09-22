@@ -78,7 +78,7 @@ export default function EmployeeManagementPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl text-white text-sm font-bold animate-in slide-in-from-right-10 duration-300 ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+        <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl text-white text-sm font-bold animate-in slide-in-from-right-10 duration-300 ${toast.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`}>
           <span className="material-symbols-outlined text-lg">{toast.type === 'success' ? 'check_circle' : 'error'}</span>
           {toast.message}
         </div>
@@ -87,7 +87,7 @@ export default function EmployeeManagementPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-black text-on-surface font-headline tracking-tighter">ระบบจัดการพนักงาน</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-on-surface font-headline tracking-tighter">ระบบจัดการพนักงาน</h1>
           <p className="text-sm text-slate-500 font-medium">เพิ่ม แก้ไข และจัดการรายชื่อพนักงานขับรถ/พนักงานขาย</p>
         </div>
         <button
@@ -134,7 +134,7 @@ export default function EmployeeManagementPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[720px]">
             <thead>
               <tr className="bg-slate-50/80 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100">
                 <th className="px-6 py-4">พนักงาน</th>
@@ -210,8 +210,8 @@ export default function EmployeeManagementPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => !isSaving && setIsModalOpen(false)} />
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg relative overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
               <div>
                 <h3 className="text-xl font-black text-slate-800">{editingDriver ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่'}</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
@@ -226,8 +226,8 @@ export default function EmployeeManagementPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={handleSave} className="p-6 space-y-5 overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-black uppercase text-slate-400 ml-1">รหัสพนักงาน <span className="text-rose-400">*</span></label>
                   <input
@@ -263,7 +263,7 @@ export default function EmployeeManagementPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-black uppercase text-slate-400 ml-1">รหัสรถ</label>
                   <input
@@ -286,7 +286,7 @@ export default function EmployeeManagementPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-black uppercase text-slate-400 ml-1">พื้นที่รับผิดชอบ</label>
                   <input

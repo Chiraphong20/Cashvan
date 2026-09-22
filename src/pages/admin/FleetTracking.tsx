@@ -15,9 +15,9 @@ export default function FleetTracking() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-black text-on-surface font-headline tracking-tighter">สถานะการทำงาน & มอบหมายพื้นที่</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-on-surface font-headline tracking-tighter">สถานะการทำงาน & มอบหมายพื้นที่</h1>
           <p className="text-sm text-slate-500 font-medium">ภาพรวมการเริ่มงานของพนักงาน และพื้นที่รับผิดชอบประจำวัน</p>
         </div>
         <div className="flex gap-2">
@@ -46,7 +46,7 @@ export default function FleetTracking() {
             <h3 className="font-bold text-slate-800">รายชื่อพนักงานและพื้นที่</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[720px]">
             <thead>
               <tr className="bg-surface-container-low/30 border-b border-surface-container text-[11px] uppercase tracking-widest font-black text-slate-400">
                 <th className="px-6 py-4">พนักงาน</th>

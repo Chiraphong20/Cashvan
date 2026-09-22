@@ -39,30 +39,30 @@ export default function SurveyAudit() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-on-surface font-headline tracking-tighter">อนุมัติผลการสำรวจ</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-on-surface font-headline tracking-tighter">อนุมัติผลการสำรวจ</h1>
           <p className="text-sm text-slate-500 font-medium">ตรวจสอบความถูกต้องของพิกัดและรูปภาพพนักงานภาคสนาม</p>
         </div>
       </div>
 
       {/* Stats Mini Banner */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {[
           { label: 'รอดำเนินการ', value: stats.pending, color: 'bg-primary', type: 'PENDING' },
           { label: 'อนุมัติแล้ว', value: stats.approved, color: 'bg-secondary', type: 'APPROVED' },
           { label: 'ไม่ผ่าน', value: stats.rejected, color: 'bg-error', type: 'REJECTED' }
         ].map(item => (
-          <button 
+          <button
             key={item.type}
             onClick={() => setFilter(item.type as any)}
-            className={`precision-card p-6 border-b-4 transition-all text-left ${filter === item.type ? `border-${item.type === 'PENDING' ? 'primary' : item.type === 'APPROVED' ? 'secondary' : 'error'} scale-[1.02] shadow-lg` : 'border-transparent opacity-60'}`}
+            className={`precision-card p-3 sm:p-6 border-b-4 transition-all text-left ${filter === item.type ? `border-${item.type === 'PENDING' ? 'primary' : item.type === 'APPROVED' ? 'secondary' : 'error'} scale-[1.02] shadow-lg` : 'border-transparent opacity-60'}`}
           >
-            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">{item.label}</p>
-            <div className="flex items-center gap-3">
-              <p className="text-2xl font-black text-on-surface">{item.value}</p>
-              <span className={`w-2 h-2 rounded-full ${item.type === 'PENDING' ? 'bg-primary' : item.type === 'APPROVED' ? 'bg-secondary' : 'bg-error'}`}></span>
+            <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase mb-1 truncate">{item.label}</p>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <p className="text-lg sm:text-2xl font-black text-on-surface">{item.value}</p>
+              <span className={`w-2 h-2 rounded-full shrink-0 ${item.type === 'PENDING' ? 'bg-primary' : item.type === 'APPROVED' ? 'bg-secondary' : 'bg-error'}`}></span>
             </div>
           </button>
         ))}
@@ -99,9 +99,9 @@ export default function SurveyAudit() {
               </div>
 
               {/* Data Section */}
-              <div className="lg:col-span-8 p-8 flex flex-col justify-between">
+              <div className="lg:col-span-8 p-4 sm:p-8 flex flex-col justify-between">
                 <div>
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                     <div>
                       <h3 className="text-xl font-black text-on-surface tracking-tight mb-1">{store.name}</h3>
                       <div className="flex items-center gap-2 text-slate-400">
@@ -110,7 +110,7 @@ export default function SurveyAudit() {
                       </div>
                     </div>
                     {store.discrepancy_reason && (
-                       <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 max-w-[240px]">
+                       <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 w-full sm:max-w-[240px]">
                           <p className="text-[9px] font-black text-amber-600 uppercase mb-1 flex items-center gap-1">
                             <span className="material-symbols-outlined text-xs">warning</span> เหตุผลพิกัดไม่ตรง
                           </p>

@@ -43,7 +43,7 @@ export default function AdminLogin() {
       <div className="absolute top-[-20%] left-[-10%] w-96 h-96 bg-primary/20 rounded-full blur-[100px]"></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]"></div>
 
-      <div className="bg-white/80 backdrop-blur-xl border border-white p-10 rounded-[3rem] shadow-2xl shadow-primary/10 w-full max-w-md relative z-10">
+      <div className="bg-white/80 backdrop-blur-xl border border-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-2xl shadow-primary/10 w-full max-w-md relative z-10">
         <div className="text-center mb-10">
           <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary-container rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/30">
             <span className="material-symbols-outlined text-white text-4xl">admin_panel_settings</span>

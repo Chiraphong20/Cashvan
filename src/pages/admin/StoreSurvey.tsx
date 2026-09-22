@@ -130,7 +130,7 @@ export default function StoreSurvey() {
   }, [districtFilter]);
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500 font-body relative">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-in fade-in duration-500 font-body relative">
       {/* Saving Overlay */}
       {saving && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[10000] flex items-center justify-center p-8 animate-in fade-in duration-300">
@@ -143,12 +143,12 @@ export default function StoreSurvey() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-black text-on-surface tracking-tighter">ร้านค้าและผลสำรวจ</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-on-surface tracking-tighter">ร้านค้าและผลสำรวจ</h1>
           <p className="text-sm text-slate-500 font-medium mt-1">Master database for all pinned and surveyed locations</p>
         </div>
-        <button 
+        <button
           onClick={handleOpenAdd}
-          className="bg-primary text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
+          className="bg-primary text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 w-full md:w-auto"
         >
           <span className="material-symbols-outlined text-lg">add_location_alt</span>
           เพิ่มข้อมูลร้านค้าใหม่
@@ -156,7 +156,7 @@ export default function StoreSurvey() {
       </div>
 
       {/* Advanced Filter Panel */}
-      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
+      <div className="bg-white p-4 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Search */}
             <div className="space-y-1.5">
@@ -220,7 +220,7 @@ export default function StoreSurvey() {
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-slate-100">
             <div className="space-y-1.5">
                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">พื้นที่ (อำเภอ และ ตำบล)</label>
-               <div className="flex gap-4">
+               <div className="flex flex-col sm:flex-row gap-4">
                   <select 
                     className="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none appearance-none"
                     value={districtFilter}
@@ -241,8 +241,8 @@ export default function StoreSurvey() {
                </div>
             </div>
             
-            <div className="flex items-end gap-3 justify-end pb-1">
-               <button 
+            <div className="flex flex-wrap items-end gap-3 justify-end pb-1">
+               <button
                 onClick={() => {
                   setSearchTerm(''); setStatusFilter('ALL'); setDistrictFilter(''); setDriverFilter(''); setSubDistrictFilter(''); setIsCustomerFilter('ALL');
                 }}
@@ -250,7 +250,7 @@ export default function StoreSurvey() {
                >
                  รีเซ็ตตัวกรอง
                </button>
-               <div className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest">
+               <div className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                   ผลการค้นหา: {filteredData.length} รายการ
                </div>
             </div>
@@ -260,7 +260,7 @@ export default function StoreSurvey() {
       {/* Main Table Content */}
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
          <div className="overflow-x-auto max-h-[700px] custom-scrollbar">
-            <table className="w-full">
+            <table className="w-full min-w-[1000px]">
                <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest sticky top-0 z-10">
                   <tr>
                      <th className="px-8 py-5 text-left">สถานะ</th>
@@ -357,7 +357,7 @@ export default function StoreSurvey() {
          </div>
          
          {/* Footer / Pagination Mockup */}
-         <div className="p-6 bg-slate-50 flex justify-between items-center text-slate-400">
+         <div className="p-6 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3 text-slate-400">
             <p className="text-[10px] font-bold">แสดงทั้งหมด {filteredData.length} จาก {stores.length} รายการ</p>
             <div className="flex gap-2">
                <button className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center hover:bg-white text-xs font-bold">1</button>
@@ -369,7 +369,7 @@ export default function StoreSurvey() {
       {/* Store Modal */}
       {isModalOpen && editingStore && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSaveStore} className="bg-white rounded-[2.5rem] w-full max-w-2xl p-8 shadow-2xl flex flex-col max-h-[90vh]">
+          <form onSubmit={handleSaveStore} className="bg-white rounded-[2rem] md:rounded-[2.5rem] w-full max-w-2xl p-4 md:p-8 shadow-2xl flex flex-col max-h-[90vh]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-black text-slate-800">{editingStore.id ? 'แก้ไขข้อมูลร้านค้า' : 'เพิ่มร้านค้าใหม่'}</h2>
               <button type="button" onClick={() => setIsModalOpen(false)} className="w-10 h-10 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center hover:bg-rose-100 hover:text-rose-500 transition-all">
@@ -383,7 +383,7 @@ export default function StoreSurvey() {
                 <input required name="name" defaultValue={editingStore.name} className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-primary/30" />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">เบอร์โทรติดต่อ</label>
                   <input name="phone" defaultValue={editingStore.phone} className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-primary/30" />
@@ -439,7 +439,7 @@ export default function StoreSurvey() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ละติจูด (Lat)</label>
                   <input name="lat" type="number" step="any" defaultValue={editingStore.lat} className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-mono outline-none focus:border-primary/30" />

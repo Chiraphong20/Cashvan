@@ -64,14 +64,14 @@ export default function SalesReports() {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500 font-body">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-in fade-in duration-500 font-body">
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-4 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
         <div>
-          <h1 className="text-3xl font-black text-on-surface tracking-tighter">รายงานยอดขายและวิเคราะห์</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-on-surface tracking-tighter">รายงานยอดขายและวิเคราะห์</h1>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Transaction History & Performance Battle</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
            <div className="flex bg-slate-100 p-1 rounded-xl">
               {['today', 'week', 'month'].map(p => (
                 <button 
@@ -140,12 +140,12 @@ export default function SalesReports() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sales List Table */}
         <div className="lg:col-span-3 bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+          <div className="p-4 md:p-8 border-b border-slate-50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-slate-50/50">
              <h3 className="font-black text-lg text-on-surface">รายการธุรกรรมล่าสุด</h3>
              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-slate-200">History Log (Drivers: {drivers.length})</span>
           </div>
           <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
-            <table className="w-full">
+            <table className="w-full min-w-[800px]">
               <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest sticky top-0 z-10">
                 <tr>
                   <th className="px-8 py-4 text-left">วันที่/เวลา</th>
@@ -261,8 +261,8 @@ export default function SalesReports() {
       {/* Bill Modal */}
       {selectedBill && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined">receipt_long</span>
@@ -280,13 +280,13 @@ export default function SalesReports() {
               </button>
             </div>
             
-            <div className="p-6 space-y-6">
-              <div className="flex justify-between items-start">
+            <div className="p-6 space-y-6 overflow-y-auto">
+              <div className="flex justify-between items-start gap-4">
                 <div>
                   <p className="text-sm font-black text-on-surface">{selectedBill.storeName}</p>
                   <p className="text-[10px] text-slate-400 font-medium mt-1">{selectedBill.address}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedBill.driverName}</p>
                   <p className="text-[10px] text-slate-400 mt-1">
                     {new Date(selectedBill.created_at || '').toLocaleString('th-TH')}
@@ -294,8 +294,8 @@ export default function SalesReports() {
                 </div>
               </div>
 
-              <div className="border border-slate-100 rounded-2xl overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="border border-slate-100 rounded-2xl overflow-x-auto">
+                <table className="w-full text-sm min-w-[320px]">
                   <thead className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     <tr>
                       <th className="px-4 py-2 text-left">รายการ</th>
@@ -324,7 +324,7 @@ export default function SalesReports() {
               </div>
             </div>
             
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end shrink-0">
               <button 
                 onClick={() => setSelectedBill(null)}
                 className="px-6 py-2 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-wider hover:bg-slate-800 transition-colors"

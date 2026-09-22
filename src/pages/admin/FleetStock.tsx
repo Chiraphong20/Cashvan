@@ -25,7 +25,7 @@ export default function FleetStock() {
   };
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in duration-500 font-body outline-none">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 lg:space-y-8 animate-in fade-in duration-500 font-body outline-none">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-on-surface tracking-tighter">สต็อกสินค้าในรถ (Fleet)</h1>
@@ -71,9 +71,9 @@ export default function FleetStock() {
         <div className="lg:col-span-3">
           {selectedDriver ? (
             <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col min-h-[600px]">
-              <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center shrink-0">
+              <div className="p-4 md:p-8 border-b border-slate-50 bg-slate-50/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 shrink-0">
                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-3xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                    <div className="w-14 h-14 rounded-3xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
                        <span className="material-symbols-outlined text-3xl">inventory_2</span>
                     </div>
                     <div>
@@ -81,9 +81,9 @@ export default function FleetStock() {
                        <p className="text-[10px] text-slate-500 font-bold uppercase mt-1 tracking-widest">Active Inventory Management</p>
                     </div>
                  </div>
-                 <button 
+                 <button
                   onClick={() => setIsAddingStock(true)}
-                  className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-black/10 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
+                  className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-black/10 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
                  >
                    <span className="material-symbols-outlined text-base">add_box</span>
                    เติมสต็อกเข้ารองเท้า
