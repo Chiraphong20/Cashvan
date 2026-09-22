@@ -1,121 +1,163 @@
-# โครงสร้างคลาสและคอมโพเนนต์ (Class Diagram / Component Architecture)
+# โครงสร้างคลาสและคอมโพเนนต์ (Component Architecture)
 
-ระบบ Wae Jer Logistic ถูกพัฒนาด้วย React (Functional Components) ดังนั้นเอกสารนี้จะแสดงความสัมพันธ์ในรูปแบบของ **Component Hierarchy & Context Flow** แทน Class Diagram แบบดั้งเดิม
+ระบบพัฒนาด้วย React 19 (Functional Components + Hooks) เอกสารนี้จึงอธิบายในรูปแบบ **Component Hierarchy & Context Flow**
 
 ---
 
-## 1. Component Architecture (Frontend)
-
-โครงสร้างการเรียกใช้งาน Components จะแบ่งออกเป็นฝั่งพนักงาน (Driver) และฝั่งผู้ดูแล (Admin) โดยมี `Context API` คอยจัดการสถานะส่วนกลาง
+## 1. Provider & Routing Structure (`src/App.tsx`)
 
 ```mermaid
 classDiagram
     class App {
-        +Router()
+        Router()
     }
-    
     class StoreProvider {
-        +stores: Array
-        +products: Array
-        +inventory: Array
-        +fetchData()
+        stores, sales, inventories, visits, zones
+        products, categories, drivers, vehicles
+        surveyTargets, driverLocations
+        currentDriverId, currentVehicleId
+        recordSale(), transferStock(), addVisit()
+        addStore(), updateStore(), deleteStore()
+        addDriver(), updateDriver(), deleteDriver()
+        fetchInventory(), fetchProductsAndCategories()
     }
-
     class AdminAuthProvider {
-        +currentAdmin: Object
-        +login()
-        +logout()
+        currentAdmin, token
+        login(), logout(), updateProfile()
     }
-
+    class LineAuthProvider {
+        liffProfile, currentDriver
+        isLoading, isLiffError
+        bindDriver(driverId)
+    }
     class AdminLayout {
-        -Sidebar
-        -Outlet
+        Sidebar + Outlet
+        guard: currentAdmin หรือ redirect /admin/login
     }
-
     class DriverLayout {
-        -DriverNav
-        -Outlet
+        MiniProfileHeader + BottomNav + Outlet
+        guard: currentDriver หรือ redirect /driver/login
+        ping GPS ทุก 30s
     }
 
-    %% App Routing Flow
-    App --> StoreProvider : wraps
-    App --> AdminAuthProvider : wraps
+    App --> StoreProvider : wraps ทั้งแอป
+    App --> AdminAuthProvider : wraps ทั้งแอป
+    App --> LineAuthProvider : wraps เฉพาะ /driver/*
     App --> AdminLayout : /admin/*
     App --> DriverLayout : /driver/*
 
-    %% Admin Components
     AdminLayout *-- AdminDashboard
     AdminLayout *-- MapOverview
-    AdminLayout *-- Inventory
     AdminLayout *-- EmployeeManagementPage
+    AdminLayout *-- Inventory
     AdminLayout *-- SalesReports
+    AdminLayout *-- StoreSurvey
+    AdminLayout *-- SurveyAudit
     AdminLayout *-- AdminProfile
+    AdminLayout *-- ManualEbook
 
-    %% Driver Components
     DriverLayout *-- CheckInMap
+    DriverLayout *-- DriverStoreList
     DriverLayout *-- CheckInPage
+    DriverLayout *-- DriverStock
     DriverLayout *-- DigitalCatalog
     DriverLayout *-- SalesRecord
     DriverLayout *-- VisitHistory
-
-    %% Data Flow
-    StoreProvider ..> AdminDashboard : provides data
-    StoreProvider ..> Inventory : provides data
-    StoreProvider ..> CheckInMap : provides stores
-    StoreProvider ..> DigitalCatalog : provides products
-
-    AdminAuthProvider ..> AdminLayout : guard
+    DriverLayout *-- CloseDay
+    DriverLayout *-- DriverLogin
 ```
 
+### เส้นทาง (Routes)
+
+| ฝั่ง | Path | Component | หมายเหตุ |
+| :--- | :--- | :--- | :--- |
+| Driver | `/driver` (index) | CheckInMap | หน้าแรก + GPS trail |
+| Driver | `/driver/login` | DriverLogin | เลือก/ผูกบัญชีพนักงาน |
+| Driver | `/driver/check-in` | CheckInPage | สำรวจ + ขาย (807 บรรทัด) |
+| Driver | `/driver/stores` | DriverStoreList | รายการร้าน กรองอำเภอ/ตำบล |
+| Driver | `/driver/stock` | DriverStock | สต็อกบนรถ (เลือกคันรถ) |
+| Driver | `/driver/catalog` | DigitalCatalog | แคตตาล็อกสต็อกรถ |
+| Driver | `/driver/sales` | SalesRecord | บันทึกการขาย |
+| Driver | `/driver/history` | VisitHistory | ประวัติการเยี่ยม |
+| Driver | `/driver/close-day` | CloseDay | ปิดยอด/นับสต็อก |
+| Driver | `/driver/manual` | ManualEbook | คู่มือ flipbook |
+| Admin | `/admin` (index) | AdminDashboard | สรุปความคืบหน้ารายอำเภอ |
+| Admin | `/admin/map` | MapOverview | แผนที่ + fleet tracking (987 บรรทัด) |
+| Admin | `/admin/employees` | EmployeeManagementPage | จัดการพนักงาน |
+| Admin | `/admin/inventory` | Inventory | 4 แท็บ (vans/master/catalog/pos) |
+| Admin | `/admin/sales` | SalesReports | รายงานยอดขาย |
+| Admin | `/admin/stores` | StoreSurvey | จัดการร้าน |
+| Admin | `/admin/audit` | SurveyAudit | Approve/Reject ผลสำรวจ |
+| Admin | `/admin/profile` | AdminProfile | โปรไฟล์ |
+| Admin | `/admin/fleet` | FleetTracking | (ยังใช้ mockData — ยังไม่สมบูรณ์) |
+| Admin | `/admin/products` | → redirect `/admin/inventory` | |
+
 ---
 
-## 2. StoreContext (State Management)
-`StoreContext` เป็นหัวใจหลักในการดึงข้อมูลจาก Backend (REST API) มาเก็บไว้ใน Client State เพื่อให้แอปพลิเคชันทำงานได้รวดเร็วและเป็น Single Source of Truth
+## 2. StoreContext (`src/store/StoreContext.tsx`)
 
-**ข้อมูลที่มีใน Context:**
-- `stores`: พิกัดและสถานะร้านค้าทั้งหมด
-- `categories` & `products`: ข้อมูลสินค้าที่แสดงใน Catalog
-- `inventory`: สต็อกสินค้าแยกตาม Location (Master / Van)
-- `drivers` & `vehicles`: ข้อมูลทรัพยากรบุคคลและรถ
+หัวใจของการดึงและจัดการข้อมูลจาก REST API เป็น Single Source of Truth ฝั่ง client
 
-**ฟังก์ชันหลัก:**
-- `updateStoreStatus()`: ส่ง API ไปอัปเดตสถานะการเข้าเยี่ยมร้าน
-- `updateInventory()`: สั่ง Refill สต็อกหรือตัดสต็อกเมื่อเกิดการขาย
-- `refreshData()`: ดึงข้อมูลล่าสุดจาก Backend ทั้งหมด
-- `checkout()`: สร้าง Order การขายใหม่
+**State:** `stores, sales, inventories (Record<locationId, VanInventory[]>), visits, zones, products, categories, drivers, vehicles, surveyTargets, driverLocations, currentDriverId, currentVehicleId, isCollapsed`
+
+**Actions หลัก:**
+- `recordSale(driverId, storeId, items)` → `POST /api/sales` แล้ว refetch inventory/sales/visits
+- `transferStock(locationId, items)` → `POST /api/inventory/transfer`
+- `addVisit(visit)` → `POST /api/visits`
+- `addStore / updateStore / deleteStore`
+- `addDriver / updateDriver / deleteDriver`
+- `addProduct / updateProduct / deleteProduct`
+- `addSurveyTarget / deleteSurveyTarget`
+- `fetchInventory(locationId)` / `updateInventory(productId, locationId, qty)`
+- `closeDay()` / `returnStock(driverId)`
+
+**Polling:** `fetchDriverLocations()` ทุก 30 วินาที (สำหรับหน้า Admin Map)
+**Persistence:** `driver_id`, `vehicle_id`, `sidebar_collapsed` เก็บใน `localStorage`
 
 ---
 
-## 3. สถาปัตยกรรม Backend (Node.js + Express)
+## 3. Auth Contexts
 
-Backend เขียนแบบ Procedural + Functional ภายใน `server/index.ts` โดยเชื่อมต่อกับ `server/db.ts`
+| Context | ใช้กับ | กลไก |
+| :--- | :--- | :--- |
+| `AdminAuthContext` | Admin | `login()` เก็บ `admin_user` + `admin_token` ใน localStorage; `AdminLayout` เป็น guard |
+| `LineAuthContext` | Driver | `liff.init()` → ถ้าไม่ล็อกอินและไม่ใช่ localhost จะ `liff.login()`; ดึง `getProfile()` แล้วเช็ค `/api/drivers/auth-line`; `bindDriver()` เรียก `/api/drivers/bind-line`; localhost ใช้ `dev_user` |
+
+---
+
+## 4. สถาปัตยกรรม Backend (`server/`)
 
 ```mermaid
 classDiagram
-    class Server {
-        +expressApp
-        +cors()
-        +jsonParser()
-        +start(port: 3001)
+    class Server["server/index.ts"] {
+        express() + cors() + json(50mb)
+        bootstrap(): initDB + seedZones + seedProducts
+        ~50 REST endpoints
+        static(../dist) + SPA fallback
+        listen(3001)
     }
-
-    class DBConnection {
-        +mysql2.createPool()
-        +query(sql, params)
-        +initDB()
+    class DB["server/db.ts"] {
+        mysql2.createPool(dbConfig)
+        SET time_zone = +07:00
+        initDB(): CREATE TABLE IF NOT EXISTS + safeAlter (auto-heal)
+        seed: admin, vehicle V-01, categories
     }
-
-    class API_Routes {
-        +GET /api/stores
-        +GET /api/inventory
-        +POST /api/inventory/refill
-        +POST /api/sales
-        +POST /api/admin/login
-    }
-
-    Server --> API_Routes : registers
-    API_Routes --> DBConnection : queries
+    Server --> DB : import { db, initDB }
+    DB --> MySQL_WH_logistic : read/write
+    Server --> MySQL_pos : read-only (pos.products)
 ```
 
-- **`server/db.ts`**: จัดการ Schema Initialization, Seeding ข้อมูลเบื้องต้น (เช่น สร้างตาราง, เพิ่มบัญชี Admin เริ่มต้น)
-- **`server/index.ts`**: รวบรวม REST API Endpoints ทั้งหมดไว้ในไฟล์เดียว เพื่อการทำงานแบบ Lightweight Backend
+- **`server/db.ts`** — สร้าง connection pool, ตั้ง timezone, `initDB()` ทำ auto-heal คอลัมน์ทีละตัว, seed ข้อมูลตั้งต้นเมื่อว่าง
+- **`server/index.ts`** — endpoints ทั้งหมดในไฟล์เดียว, seed `zones` จาก `korat_zones.json` และสินค้าตัวอย่าง, เสิร์ฟ SPA ใน production
+
+---
+
+## 5. Utilities & Constants
+
+| ไฟล์ | หน้าที่ |
+| :--- | :--- |
+| `src/utils/cloudinary.ts` | `uploadToCloudinary(file)` — อัปโหลด unsigned preset; fallback บีบอัด Base64 (800px, q60) |
+| `src/constants/locations.ts` | `KORAT_SUBDISTRICTS`, `KORAT_DISTRICTS`, `findDistrictByCoords()` + import GeoJSON |
+| `src/store/korat_geojson.json` | ขอบเขตอำเภอโคราชสำหรับ Leaflet GeoJSON layer |
+| `src/store/mockData.ts` | ข้อมูลจำลอง (ยังใช้ใน `FleetTracking`, `CheckInPage` บางส่วน) |
+| `src/components/ui/ProgressBarLoader.tsx` | หน้าจอโหลด |

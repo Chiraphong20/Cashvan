@@ -43,6 +43,7 @@ export default function CheckInMap() {
   // GPS Trail — load today's existing trail from server on mount
   const [gpsTrail, setGpsTrail] = useState<[number, number][]>([]);
   const [trailLoaded, setTrailLoaded] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
   const pendingPoints = useRef<{ lat: number; lng: number; recorded_at: string }[]>([]);
 
   useEffect(() => {
@@ -60,7 +61,11 @@ export default function CheckInMap() {
   }, [currentDriverId]);
 
   useEffect(() => {
-    if (!trailLoaded || !("geolocation" in navigator)) return;
+    if (!trailLoaded) return;
+    if (!("geolocation" in navigator)) {
+      setGpsError('เบราว์เซอร์นี้ไม่รองรับ GPS — กรุณาเปิดในโทรศัพท์มือถือ');
+      return;
+    }
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => {
@@ -78,7 +83,15 @@ export default function CheckInMap() {
         });
         pendingPoints.current.push({ lat, lng, recorded_at: new Date().toISOString() });
       },
-      (err) => console.error(err),
+      (err) => {
+        console.error(err);
+        const msgs: Record<number, string> = {
+          1: 'ถูกปฏิเสธสิทธิ์ GPS — กรุณาอนุญาตตำแหน่งในเบราว์เซอร์แล้วรีโหลด',
+          2: 'ไม่พบสัญญาณ GPS — ลองออกไปที่โล่งแจ้ง',
+          3: 'GPS หมดเวลา — ตรวจสอบสัญญาณและลองใหม่',
+        };
+        setGpsError(msgs[err.code] || 'ไม่สามารถใช้งาน GPS ได้');
+      },
       { enableHighAccuracy: true, distanceFilter: 5 } as any
     );
 
@@ -351,6 +364,20 @@ export default function CheckInMap() {
             />
           ))}
       </MapContainer>
+
+      {/* GPS Permission Error Banner */}
+      {gpsError && (
+        <div className="absolute top-20 left-4 right-4 z-[1000] bg-red-500 text-white rounded-2xl px-4 py-3 shadow-xl flex items-start gap-3">
+          <span className="material-symbols-outlined text-xl flex-shrink-0 mt-0.5">location_off</span>
+          <div className="flex-1">
+            <p className="text-[11px] font-black uppercase tracking-widest mb-0.5">GPS ไม่ทำงาน</p>
+            <p className="text-[10px] font-bold leading-relaxed opacity-90">{gpsError}</p>
+          </div>
+          <button onClick={() => setGpsError(null)} className="opacity-70 hover:opacity-100">
+            <span className="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+      )}
 
       {/* GPS Trail Status Badge */}
       {gpsTrail.length > 0 && (

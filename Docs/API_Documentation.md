@@ -1,90 +1,116 @@
 # API Documentation (เอกสาร API)
 
-REST API ทั้งหมดในระบบ Wae Jer Logistic ถูกออกแบบและทำงานผ่าน `server/index.ts` (Express.js) รันบนพอร์ต `3001` โดยมี Endpoint หลักๆ ดังนี้
+REST API ทั้งหมดอยู่ใน `server/index.ts` (Express.js) รันบนพอร์ต **3001**
+ฝั่ง Frontend (Vite, พอร์ต 3000) เรียกผ่าน proxy `"/api" → http://127.0.0.1:3001`
+Payload limit = 50MB, CORS เปิดทั้งหมด, timezone `+07:00`
+
+รูปแบบ response ทั่วไป: สำเร็จ `{ "status": "success", ... }` หรือคืน array/object ตรง ๆ; ผิดพลาด `{ "status": "error", "message": "..." }`
 
 ---
 
-## 1. Authentication & Admin Profile
+## 1. Admin Authentication & Profile
 
-### `POST /api/admin/login`
-- **Description**: ยืนยันตัวตนแอดมินด้วย Username และ Password
-- **Request Body**: `{ "username": "admin", "password": "password123" }`
-- **Response**: `{ "status": "success", "admin": { "id": 1, "username": "admin", "name": "System Admin" }, "token": "fake-jwt-token-1" }`
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| POST | `/api/admin/login` | body `{ username, password }` → ตรวจ SHA-256, คืน `{ status, admin, token: "fake-jwt-token-<id>" }` (401 ถ้าไม่ผ่าน) |
+| GET | `/api/admin/profile?id=1` | คืน `{ status, admin: { id, username, name } }` |
+| PUT | `/api/admin/profile` | body `{ id, name, newPassword? }` — อัปเดตชื่อ และรหัสผ่านถ้าส่งมา |
 
-### `GET /api/admin/profile?id=1`
-- **Description**: ดึงข้อมูลโปรไฟล์ของแอดมิน
+## 2. Zones
 
-### `PUT /api/admin/profile`
-- **Description**: อัปเดตข้อมูลส่วนตัว (ชื่อ และ/หรือ รหัสผ่าน)
-- **Request Body**: `{ "id": 1, "name": "New Name", "newPassword": "newPassword" }`
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/zones` | คืนทุกแถวใน `zones` (อำเภอ + ตำบล) |
+
+## 3. Stores & Survey
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/stores` | query `sub_district_id?` — คืนร้านทั้งหมดพร้อม `sub_district_name`, `district_name` (join `zones`); มี data-healing ประเภทร้าน/ตำบล/ที่อยู่ |
+| GET | `/api/stores/:id` | คืนร้านรายตัวพร้อม `photo_url` เต็ม |
+| POST | `/api/stores` | สร้างร้านใหม่ (id = `st_<timestamp>` ถ้าไม่ส่ง); ฟิลด์: name, address, sub_district(_id), district, lat, lng, type, status, created_by, phone, is_customer, sales_zone, verification_status(default PENDING) |
+| PUT | `/api/stores` | body `{ id, ...fields }` — dynamic update เฉพาะฟิลด์ที่ส่ง |
+| DELETE | `/api/stores/:id` | ลบแบบ cascade: `sale_items` → `sales` → `visits` → `stores` |
+
+## 4. Visits
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/visits` | query `driver_id?` — เรียงจากใหม่ไปเก่า |
+| POST | `/api/visits` | body `{ store_id, driver_id, status, photo_url, notes }` |
+
+## 5. Products & Categories
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/categories` | รายการหมวดหมู่ |
+| GET | `/api/products` | รายการสินค้าทั้งหมด |
+| POST | `/api/products` | body `{ name, sku, category_id, price }` |
+| PUT | `/api/products/:id` | body `{ name, sku, category_id, price }` |
+| DELETE | `/api/products/:id` | ลบสินค้า |
+| POST | `/api/products/sync-from-pos` | นำเข้าแคตตาล็อกจาก `pos.products` → สร้าง/อัปเดต `categories`, `products`, และ `inventory` MASTER สำหรับสินค้าใหม่; ปลอดภัยเมื่อรันซ้ำ (จับคู่ `pos_product_id`); คืน `{ status, newProducts, updatedProducts, total }` |
+
+## 6. Inventory
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/inventory` | query `vehicle_id?` หรือ `driver_id?` = location_id; ถ้าไม่ส่ง คืนสต็อก `location_type = 'MASTER'` |
+| PUT | `/api/inventory` | body `{ product_id, location_id, quantity, location_type? }` — upsert ตามคู่ (product_id, location_id) |
+| POST | `/api/inventory/transfer` | body `{ location_id, location_type: 'VEHICLE', items: [{ product_id, quantity }] }` — ลด MASTER, เพิ่ม/สร้างที่รถ, บันทึก `stock_transactions` (TRANSFER) ในทรานแซกชัน |
+| POST | `/api/inventory/return` | body `{ driver_id }` — ลบสต็อก VAN ของพนักงาน (ใช้ตอนคืนของ) |
+| POST | `/api/reconciliation` | body `{ driver_id, report }` — บันทึกผลนับสต็อกปลายวันและล้างสต็อก VAN |
+| GET | `/api/pos-products` | query `search?`, `limit?`(≤200, def 50), `offset?` — คืน `{ items, total }` จาก `pos.products` (อ่านอย่างเดียว) |
+
+## 7. Sales
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/sales` | ทุกบิลเรียงใหม่→เก่า พร้อม `items[]` (join `products` → `product_name`) |
+| POST | `/api/sales` | body `{ store_id, driver_id, vehicle_id, total_amount, items: [{ product_id, quantity, price }] }` — **บังคับ `vehicle_id`** (400 ถ้าไม่มี); ทรานแซกชัน: insert `sales` + `sale_items`, ตัด `inventory` ของรถ, insert `visits` (SUCCESS), `UPDATE stores SET status='SUCCESS'` |
+| DELETE | `/api/sales/:id` | คืนสต็อกรถตาม `sale_items` แล้วลบบิล (ทรานแซกชัน) |
+
+## 8. Drivers & Vehicles
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/drivers` | รายชื่อพนักงานทั้งหมด |
+| POST | `/api/drivers` | body `{ id, name, phone, vehicle_plate, vehicle_code, assigned_zone, work_status, avatar_url }` |
+| PUT | `/api/drivers/:id` | อัปเดตเฉพาะฟิลด์ที่อยู่ใน whitelist; ถ้าเปลี่ยน `name` จะ cascade `UPDATE stores SET created_by` |
+| DELETE | `/api/drivers/:id` | ลบพนักงาน |
+| POST | `/api/drivers/auth-line` | body `{ line_user_id }` → `{ status: 'success', driver }` หรือ `{ status: 'not_found' }` |
+| POST | `/api/drivers/bind-line` | body `{ driver_id, line_user_id, line_display_name, line_picture_url }` — ผูกบัญชี LINE เข้ากับพนักงาน |
+| GET | `/api/vehicles` | รายการรถทั้งหมด |
+
+## 9. GPS & Fleet Tracking
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| POST | `/api/driver-location` | body `{ driver_id, lat, lng, accuracy? }` — upsert 1 แถว/คน ใน `driver_locations` |
+| GET | `/api/driver-locations` | ตำแหน่งล่าสุดของพนักงานทุกคน (Admin poll ทุก 30s) |
+| POST | `/api/gps-track` | body `{ driver_id, points: [{ lat, lng, recorded_at? }] }` — batch insert ลง `gps_tracks` |
+| GET | `/api/gps-track/:driver_id` | query `date?` (default วันนี้) — เส้นทางของพนักงานคนเดียว เรียงตามเวลา |
+| GET | `/api/gps-tracks` | query `date?` — เส้นทางของพนักงานทุกคนในวันนั้น |
+
+## 10. Survey Targets (Geofence)
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/survey-targets` | เฉพาะ `status = 'ACTIVE'` |
+| POST | `/api/survey-targets` | body `{ name, lat, lng, radius?, color?, assigned_driver_id? }` |
+| DELETE | `/api/survey-targets/:id` | soft-delete → `status = 'ARCHIVED'` |
+
+## 11. Stats
+
+| Method | Endpoint | รายละเอียด |
+| :--- | :--- | :--- |
+| GET | `/api/stats` | `{ total_stores, surveyed_stores, recent_activity, completion_rate }` |
+
+## 12. Static / SPA Fallback
+- `express.static('../dist')` เสิร์ฟไฟล์ build ของ Frontend
+- `GET *` ส่ง `dist/index.html` (รองรับ client-side routing)
 
 ---
 
-## 2. Store & Survey (ร้านค้าและพิกัด)
-
-### `GET /api/stores`
-- **Description**: ดึงรายการร้านค้าทั้งหมดเพื่อใช้แสดงบนแผนที่ และตรวจสอบสถานะล่าสุด
-
-### `POST /api/stores`
-- **Description**: เพิ่มร้านค้าใหม่เข้าสู่ระบบ (มักใช้จากฝั่ง Driver เวลาเจอร้านใหม่)
-- **Request Body**: `{ "name": "Store A", "lat": 14.9, "lng": 102.1, "type": "Retail" }`
-
-### `POST /api/visits`
-- **Description**: บันทึกการเข้าเยี่ยมร้าน (Store Survey)
-- **Request Body**: `{ "storeId": 1, "driverId": 1, "status": "SURVEYED", "photoUrl": "data:image/jpeg;base64,...", "notes": "Shop is closed today" }`
-- **Action**: บันทึกลงตาราง `visits` และอัปเดตตาราง `stores` คอลัมน์ `status` กับ `photo_url`
-
----
-
-## 3. Inventory & Master Data
-
-### `GET /api/inventory`
-- **Description**: ดึงรายการสินค้าคงคลังทั้งหมด รองรับ Query String `?type=master` สำหรับคลังหลัก หรือ `?type=van&location_id=V-01` สำหรับดึงเฉพาะของบนรถคันนั้น
-- **Response Format**: `[{ "id": 1, "product_id": 1, "name": "Product A", "quantity": 100, ... }]`
-
-### `POST /api/inventory/refill`
-- **Description**: โอนย้ายสต็อกสินค้าจากคลังหลัก เข้าสู่รถ (Van)
-- **Request Body**: `{ "items": [{ "product_id": 1, "quantity": 10 }], "vehicle_id": "V-01" }`
-- **Action**: ลดสต็อกจาก `MASTER`, เพิ่มสต็อกให้ `V-01`, และสร้าง Log ใน `stock_transactions`
-
-### `GET /api/products`
-- **Description**: ดึงรายการข้อมูลสินค้าหลัก (Master Products)
-
-### `POST /api/products` / `PUT /api/products/:id` / `DELETE /api/products/:id`
-- **Description**: จัดการข้อมูล Master Products (Admin Use Only)
-
----
-
-## 4. Sales & Transactions
-
-### `GET /api/sales`
-- **Description**: ดึงรายการประวัติการขายทั้งหมด
-
-### `POST /api/sales`
-- **Description**: บันทึกการขายเมื่อพนักงานรับออเดอร์หน้าร้าน
-- **Request Body**: 
-  ```json
-  {
-    "store_id": 1,
-    "driver_id": 1,
-    "total_amount": 500.00,
-    "items": [
-      { "product_id": 1, "quantity": 2, "price": 100.00 },
-      { "product_id": 2, "quantity": 1, "price": 300.00 }
-    ],
-    "vehicle_id": "V-01"
-  }
-  ```
-- **Action**: สร้าง Order ใน `sales` และ `sale_items`, หักลบสต็อกที่ `location_id = 'V-01'` ในตาราง `inventory`
-
----
-
-## 5. Drivers & Employees
-
-### `GET /api/drivers`
-- **Description**: ดึงรายการพนักงานขับรถทั้งหมด พร้อมรถที่ขับ (`vehicle_id`)
-
-### `PUT /api/drivers/:id/status`
-- **Description**: อัปเดตสถานะการทำงานของพนักงาน (เช่น กำลังวิ่งงาน, พัก)
-
-*(หมายเหตุ: ระบบรับส่งภาพบางส่วนใช้การอัปโหลดแบบ Base64 ซึ่งรองรับใน Endpoint `POST /api/visits` โดยได้กำหนด limit payload ใน Express ไว้สูงถึง 50mb เรียบร้อยแล้ว)*
+### หมายเหตุ
+- ยังไม่มี middleware ตรวจ token ที่ฝั่ง server — การป้องกันสิทธิ์ทำที่ฝั่ง client
+- endpoint การขายเดิมชื่อ `/api/inventory/refill` ถูกแทนที่ด้วย `/api/inventory/transfer`

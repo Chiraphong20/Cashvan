@@ -1,6 +1,8 @@
 # โครงสร้างฐานข้อมูล (Entity-Relationship Diagram)
 
-เอกสารนี้แสดงแผนผังโครงสร้างฐานข้อมูล (ER Diagram) ของระบบ Wae Jer Logistic ซึ่งถูกออกแบบมารองรับระบบสินค้าคงคลังหลายระดับ (Master/Van), การเก็บข้อมูลพนักงาน, ยานพาหนะ, ข้อมูลร้านค้า และการบันทึกการขาย
+เอกสารนี้แสดงโครงสร้างฐานข้อมูล MySQL (`WH_logistic`) ของระบบ Wae Jer Logistic ตามที่นิยามใน `server/db.ts` และใช้งานจริงใน `server/index.ts`
+
+> ระบบยังอ่านข้อมูลจากฐานข้อมูล **`pos`** (ระบบ line-commerce) บนเซิร์ฟเวอร์ MySQL เดียวกัน โดยเฉพาะตาราง `pos.products` — เป็นการอ่านอย่างเดียว ไม่มี Foreign Key ข้ามฐานข้อมูล
 
 ---
 
@@ -10,130 +12,192 @@
 erDiagram
     admins {
         int id PK
-        varchar username
-        varchar password "SHA-256 Hashed"
+        varchar username "UNIQUE"
+        varchar password "SHA-256"
         varchar name
+    }
+
+    zones {
+        int id PK "subdistrict = จริง + 10000"
+        text name_th
+        int parent_id "อำเภอที่สังกัด"
     }
 
     categories {
         int id PK
-        varchar name
+        text name
     }
 
     products {
         int id PK
-        varchar code "MOC-XXX"
-        varchar name
+        text name
+        varchar sku "UNIQUE"
         int category_id FK
         decimal price
-        varchar image_url
+        decimal wholesale_price
+        varchar unit
+        longtext image
+        varchar barcode
+        varchar pos_product_id "UNIQUE, อ้างอิง pos.products.id"
     }
 
     vehicles {
-        varchar id PK
+        varchar id PK "เช่น V-01"
         varchar plate_number
         varchar code
-        varchar status "ACTIVE / MAINTENANCE"
+        varchar status "AVAILABLE / MAINTENANCE"
     }
 
     drivers {
-        int id PK
+        varchar id PK "เช่น d1"
         varchar name
         varchar phone
-        varchar work_status "OFF_DUTY / ON_DUTY"
-        varchar line_user_id "LINE LIFF ID"
-        varchar vehicle_id FK
+        varchar work_status "ONLINE / OFFLINE"
+        varchar vehicle_plate
+        varchar vehicle_code
+        varchar assigned_zone
+        text avatar_url
+        varchar line_user_id
+        varchar line_display_name
+        text line_picture_url
     }
 
     stores {
-        int id PK
+        varchar id PK "เช่น st_1699999999"
         varchar name
-        decimal lat
-        decimal lng
+        text address
+        varchar sub_district
+        varchar district
+        int sub_district_id FK
+        double lat
+        double lng
         varchar type
-        varchar status "PENDING / SURVEYED"
+        varchar status "UNSURVEYED / SUCCESS / NOT_FOUND"
+        varchar verification_status "PENDING / APPROVED / REJECTED"
         longtext photo_url
-        datetime last_visited
+        varchar created_by "ชื่อพนักงาน"
+        boolean is_customer
+        varchar phone
+        varchar sales_zone
+        varchar assigned_driver_id
+        datetime created_at
     }
 
     inventory {
-        int product_id PK, FK
-        varchar location_id PK "e.g. 'MASTER', 'V-01'"
-        varchar location_type "MASTER / VAN"
+        int id PK
+        int product_id FK
         int quantity
+        varchar location_id "'' = MASTER, หรือรหัสรถ V-01"
+        varchar location_type "MASTER / VEHICLE"
     }
 
     stock_transactions {
         int id PK
         int product_id FK
-        varchar from_location
-        varchar to_location
         int quantity
-        varchar transaction_type "REFILL / SALE / RETURN"
+        varchar source_location
+        varchar target_location
+        varchar transaction_type "TRANSFER / SALE / RETURN"
         datetime created_at
     }
 
     sales {
-        int id PK
-        int store_id FK
-        int driver_id FK
+        varchar id PK "เช่น sl_1699999999"
+        varchar store_id FK
+        varchar driver_id FK
+        varchar vehicle_id FK
         decimal total_amount
         datetime created_at
     }
 
     sale_items {
         int id PK
-        int sale_id FK
+        varchar sale_id FK
         int product_id FK
         int quantity
         decimal price
-        decimal total
     }
 
     visits {
         int id PK
-        int store_id FK
-        int driver_id FK
-        varchar status "PENDING / APPROVED / REJECTED"
+        varchar store_id FK
+        varchar driver_id FK
+        varchar status "SUCCESS / FAILED / CLOSED"
         longtext photo_url
         text notes
         datetime visited_at
     }
 
     survey_targets {
-        int id PK
-        int store_id FK
-        int driver_id FK
-        date target_date
-        varchar status
+        varchar id PK "เช่น trg_1699999999"
+        varchar name
+        double lat
+        double lng
+        int radius "เมตร"
+        varchar color
+        varchar assigned_driver_id FK
+        varchar status "ACTIVE / ARCHIVED"
     }
 
-    %% Relationships
+    driver_locations {
+        int id PK
+        varchar driver_id "UNIQUE (upsert รายคน)"
+        double lat
+        double lng
+        float accuracy
+        datetime updated_at
+    }
+
+    gps_tracks {
+        int id PK
+        varchar driver_id "INDEX (driver_id, recorded_at)"
+        double lat
+        double lng
+        datetime recorded_at
+    }
+
+    trips {
+        varchar id PK
+        varchar driver_id
+        varchar vehicle_id
+        varchar vehicle_plate
+        int crew_count
+        text crew_names
+        datetime departure_time
+        datetime return_time
+        varchar status "ACTIVE"
+        int planned_store_count
+        text notes
+        datetime created_at
+    }
+
+    zones ||--o{ zones : "อำเภอ→ตำบล (parent_id)"
+    zones ||--o{ stores : "sub_district_id"
     categories ||--o{ products : "has"
-    vehicles ||--o{ drivers : "assigned to"
-    products ||--o{ inventory : "stocked in"
-    
+    products ||--o{ inventory : "stocked as"
     products ||--o{ stock_transactions : "logged in"
     products ||--o{ sale_items : "sold as"
     sales ||--o{ sale_items : "contains"
-    
     stores ||--o{ sales : "purchases"
     drivers ||--o{ sales : "makes"
-    
+    vehicles ||--o{ sales : "from"
     stores ||--o{ visits : "receives"
     drivers ||--o{ visits : "conducts"
-    
-    stores ||--o{ survey_targets : "assigned for"
+    drivers ||--o{ driver_locations : "last position"
+    drivers ||--o{ gps_tracks : "trail points"
+    drivers ||--o{ trips : "runs"
     drivers ||--o{ survey_targets : "assigned to"
 ```
 
 ---
 
-## 2. คำอธิบายตารางหลัก
+## 2. หมายเหตุการออกแบบที่สำคัญ
 
-- **admins**: เก็บข้อมูลผู้ดูแลระบบและรหัสผ่านที่เข้ารหัสเพื่อความปลอดภัย
-- **products & categories**: ข้อมูลสินค้าและหมวดหมู่ (อ้างอิงจากรหัส MOC)
-- **inventory**: ตารางสำคัญที่สุดที่ทำหน้าที่แยกสต็อก โดยใช้ `location_id` เป็นตัวแยกว่าเป็น 'MASTER' หรือเป็น ID ของรถ ('V-01', 'V-02') `location_type` จะระบุว่าเป็น 'MASTER' หรือ 'VAN'
-- **stores & visits**: `stores` เก็บข้อมูลพิกัดและรายละเอียดร้านค้า ส่วน `visits` จะเก็บข้อมูล Log ว่าใครเข้าไปเยี่ยมร้านนี้เมื่อไหร่ และอัปโหลดภาพอะไรบ้าง
-- **sales & sale_items**: จัดเก็บข้อมูลบิลขายและรายละเอียดรายการสินค้าที่ขายออกไปในแต่ละบิล
-- **drivers & vehicles**: จับคู่พนักงานขับรถกับยานพาหนะ โดยเชื่อม `line_user_id` เข้ากับระบบ LIFF
+- **Primary Key เป็น VARCHAR** สำหรับ `stores` (`st_<timestamp>`), `sales` (`sl_<timestamp>`), `drivers` (`d1`, ...), `vehicles` (`V-01`), `survey_targets` (`trg_<timestamp>`) — สร้างจากฝั่งแอปพลิเคชัน ไม่ใช่ AUTO_INCREMENT
+- **`inventory` ไม่มี composite key** — ใช้ `id` AUTO_INCREMENT และค้นด้วยคู่ (`product_id`, `location_id`); MASTER คือ `location_type = 'MASTER'` และ `location_id = ''`
+- **`zones`** เก็บทั้งอำเภอและตำบลในตารางเดียว: ตำบลใช้ `id` = ค่าจริง + 10000 และ `parent_id` ชี้ไปที่อำเภอ (seed จาก `korat_zones.json`)
+- **สถานะร้าน 2 มิติ:** `stores.status` (ความคืบหน้าการเยี่ยม) แยกจาก `stores.verification_status` (ผลการตรวจสอบโดยแอดมิน)
+- **`sale_items` ไม่มีคอลัมน์ `total`** — คำนวณ `quantity * price` ตอนแสดงผล
+- **`pos_product_id`** เชื่อม `products` กับ `pos.products` แบบ logical (มี UNIQUE index) ใช้ตอน sync แคตตาล็อก
+- **การลบร้าน** เป็น cascade ที่ระดับแอปพลิเคชัน (ลบ `sale_items` → `sales` → `visits` → `stores`)
+- ตาราง `trips` มีอยู่ในสคีมาเพื่อรองรับฟีเจอร์บันทึกรอบเดินรถ/ทีมงาน แต่ยังไม่มี API endpoint ใช้งานเต็มรูปแบบในปัจจุบัน
