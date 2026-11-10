@@ -88,6 +88,11 @@ export const initDB = async () => {
         await safeAlter('inventory', 'location_id', 'VARCHAR(50)');
         await safeAlter('inventory', 'location_type', 'VARCHAR(50)');
 
+        // Admin Patches - allow suspending admin accounts
+        await safeAlter('admins', 'is_active', 'TINYINT(1) DEFAULT 1');
+        await safeAlter('admins', 'role', "VARCHAR(20) DEFAULT 'ADMIN'");
+        await safeAlter('admins', 'created_at', 'DATETIME DEFAULT CURRENT_TIMESTAMP');
+
         // Sales Patches
         await safeAlter('sales', 'vehicle_id', 'VARCHAR(50)');
 
@@ -165,6 +170,12 @@ export const initDB = async () => {
             const crypto = await import('crypto');
             const hashedPwd = crypto.default.createHash('sha256').update('password123').digest('hex');
             await connection.query('INSERT INTO admins (username, password, name) VALUES (?, ?, ?)', ['admin', hashedPwd, 'System Admin']);
+        }
+
+        // Make sure at least one SUPER_ADMIN exists (promote the oldest admin)
+        const [superCount] = await connection.query("SELECT COUNT(*) as count FROM admins WHERE role = 'SUPER_ADMIN'") as any;
+        if (superCount[0].count === 0) {
+            await connection.query("UPDATE admins SET role = 'SUPER_ADMIN' WHERE id = (SELECT id FROM (SELECT MIN(id) AS id FROM admins) t)");
         }
 
         console.log('🚀 All systems ready.');

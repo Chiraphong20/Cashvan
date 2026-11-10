@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAdminAuth } from '../../store/AdminAuthContext';
 
 export default function AdminProfile() {
-  const { currentAdmin, updateProfile } = useAdminAuth();
+  const { currentAdmin, updateProfile, token, logout } = useAdminAuth();
   const [name, setName] = useState(currentAdmin?.name || '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,13 +24,13 @@ export default function AdminProfile() {
     try {
       const res = await fetch('/api/admin/profile', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ 
-          id: currentAdmin?.id, 
           name, 
           newPassword: newPassword || undefined 
         })
       });
+      if (res.status === 401) { logout(); return; }
       const data = await res.json();
 
       if (data.status === 'success') {

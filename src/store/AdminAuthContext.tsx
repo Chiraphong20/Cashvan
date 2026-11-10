@@ -4,6 +4,7 @@ interface Admin {
   id: number;
   username: string;
   name: string;
+  role?: 'SUPER_ADMIN' | 'ADMIN';
 }
 
 interface AdminAuthContextType {
@@ -13,6 +14,7 @@ interface AdminAuthContextType {
   login: (admin: Admin, token: string) => void;
   logout: () => void;
   updateProfile: (admin: Admin) => void;
+  isSuperAdmin: boolean;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
@@ -53,7 +55,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   return (
-    <AdminAuthContext.Provider value={{ currentAdmin, token, loading, login, logout, updateProfile }}>
+    <AdminAuthContext.Provider value={{ currentAdmin, token, loading, login, logout, updateProfile, isSuperAdmin: currentAdmin?.role === 'SUPER_ADMIN' }}>
       {children}
     </AdminAuthContext.Provider>
   );

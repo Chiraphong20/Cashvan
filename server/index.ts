@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { db, initDB } from './db';
+import { signAdminToken, requireAdmin, requireSuperAdmin } from './auth';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -1026,19 +1027,24 @@ app.post('/api/admin/login', async (req, res) => {
         if (admins[0].password !== hashedPwd) {
             return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
         }
+        if (admins[0].is_active === 0) {
+            return res.status(403).json({ status: 'error', message: 'บัญชีนี้ถูกระงับการใช้งาน' });
+        }
         
         // Return without password
         const { password: _, ...adminData } = admins[0];
-        res.json({ status: 'success', admin: adminData, token: `fake-jwt-token-${admins[0].id}` });
+        const role = adminData.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN';
+        const token = signAdminToken({ id: adminData.id, username: adminData.username, role });
+        res.json({ status: 'success', admin: { id: adminData.id, username: adminData.username, name: adminData.name, role }, token });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message });
     }
 });
 
-app.get('/api/admin/profile', async (req, res) => {
-    const { id } = req.query;
+app.get('/api/admin/profile', requireAdmin, async (req, res) => {
+    const id = (req as any).admin.id;
     try {
-        const [admins] = await db.query('SELECT id, username, name FROM admins WHERE id = ?', [id]) as any;
+        const [admins] = await db.query('SELECT id, username, name, COALESCE(role, "ADMIN") AS role FROM admins WHERE id = ?', [id]) as any;
         if (admins.length === 0) return res.status(404).json({ status: 'error', message: 'Admin not found' });
         res.json({ status: 'success', admin: admins[0] });
     } catch (error: any) {
@@ -1046,8 +1052,9 @@ app.get('/api/admin/profile', async (req, res) => {
     }
 });
 
-app.put('/api/admin/profile', async (req, res) => {
-    const { id, name, newPassword } = req.body;
+app.put('/api/admin/profile', requireAdmin, async (req, res) => {
+    const id = (req as any).admin.id;
+    const { name, newPassword } = req.body;
     try {
         if (newPassword) {
             const crypto = await import('crypto');
@@ -1057,8 +1064,82 @@ app.put('/api/admin/profile', async (req, res) => {
             await db.query('UPDATE admins SET name = ? WHERE id = ?', [name, id]);
         }
         
-        const [admins] = await db.query('SELECT id, username, name FROM admins WHERE id = ?', [id]) as any;
+        const [admins] = await db.query('SELECT id, username, name, COALESCE(role, "ADMIN") AS role FROM admins WHERE id = ?', [id]) as any;
         res.json({ status: 'success', admin: admins[0] });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+// Admin User Management
+// All routes require a valid JWT with role SUPER_ADMIN; the acting admin comes from the token, not the request body.
+const hashPwd = async (pwd: string) => (await import('crypto')).createHash('sha256').update(pwd).digest('hex');
+
+app.get('/api/admin/users', requireAdmin, requireSuperAdmin, async (_req, res) => {
+    try {
+        const [rows] = await db.query('SELECT id, username, name, COALESCE(role, "ADMIN") AS role, COALESCE(is_active, 1) AS is_active, created_at FROM admins ORDER BY id') as any;
+        res.json({ status: 'success', admins: rows });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+app.post('/api/admin/users', requireAdmin, requireSuperAdmin, async (req, res) => {
+    const { username, name, password } = req.body;
+    const role = req.body.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN';
+    if (!username?.trim() || !name?.trim() || !password || password.length < 6) {
+        return res.status(400).json({ status: 'error', message: 'กรอกข้อมูลให้ครบ และรหัสผ่านอย่างน้อย 6 ตัวอักษร' });
+    }
+    try {
+        const [dup] = await db.query('SELECT id FROM admins WHERE username = ?', [username.trim()]) as any;
+        if (dup.length > 0) return res.status(409).json({ status: 'error', message: 'Username นี้ถูกใช้แล้ว' });
+        await db.query('INSERT INTO admins (username, password, name, role, is_active) VALUES (?, ?, ?, ?, 1)', [username.trim(), await hashPwd(password), name.trim(), role]);
+        res.json({ status: 'success' });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+app.put('/api/admin/users/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { name, password, is_active, role } = req.body;
+    const requesterId = (req as any).admin.id;
+    try {
+        const [rows] = await db.query('SELECT id FROM admins WHERE id = ?', [id]) as any;
+        if (rows.length === 0) return res.status(404).json({ status: 'error', message: 'ไม่พบผู้ใช้' });
+        if (is_active === false || is_active === 0) {
+            if (String(requesterId) === String(id)) return res.status(400).json({ status: 'error', message: 'ไม่สามารถระงับบัญชีของตัวเองได้' });
+            const [act] = await db.query('SELECT COUNT(*) AS c FROM admins WHERE COALESCE(is_active,1) = 1 AND id <> ?', [id]) as any;
+            if (act[0].c === 0) return res.status(400).json({ status: 'error', message: 'ต้องมีแอดมินที่ใช้งานได้อย่างน้อย 1 คน' });
+        }
+        if (password && password.length < 6) {
+            return res.status(400).json({ status: 'error', message: 'รหัสผ่านอย่างน้อย 6 ตัวอักษร' });
+        }
+        if (role === 'ADMIN') {
+            if (String(requesterId) === String(id)) return res.status(400).json({ status: 'error', message: 'ไม่สามารถลดสิทธิ์ของตัวเองได้' });
+        }
+        const sets: string[] = [];
+        const vals: any[] = [];
+        if (name !== undefined) { sets.push('name = ?'); vals.push(name); }
+        if (password) { sets.push('password = ?'); vals.push(await hashPwd(password)); }
+        if (is_active !== undefined) { sets.push('is_active = ?'); vals.push(is_active ? 1 : 0); }
+        if (role === 'ADMIN' || role === 'SUPER_ADMIN') { sets.push('role = ?'); vals.push(role); }
+        if (sets.length) await db.query(`UPDATE admins SET ${sets.join(', ')} WHERE id = ?`, [...vals, id]);
+        res.json({ status: 'success' });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
+app.delete('/api/admin/users/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
+    const { id } = req.params;
+    const requesterId = (req as any).admin.id;
+    try {
+        if (String(requesterId) === String(id)) return res.status(400).json({ status: 'error', message: 'ไม่สามารถลบบัญชีของตัวเองได้' });
+        const [act] = await db.query('SELECT COUNT(*) AS c FROM admins WHERE COALESCE(is_active,1) = 1 AND id <> ?', [id]) as any;
+        if (act[0].c === 0) return res.status(400).json({ status: 'error', message: 'ต้องมีแอดมินที่ใช้งานได้อย่างน้อย 1 คน' });
+        await db.query('DELETE FROM admins WHERE id = ?', [id]);
+        res.json({ status: 'success' });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message });
     }

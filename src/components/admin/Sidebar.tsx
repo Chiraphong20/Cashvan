@@ -6,6 +6,7 @@ const navItems = [
   { name: 'หน้าแรก', icon: 'dashboard', path: '/admin' },
   { name: 'Map Overview', icon: 'map', path: '/admin/map' },
   { name: 'จัดการพนักงาน', icon: 'group', path: '/admin/employees' },
+  { name: 'จัดการผู้ดูแลระบบ', icon: 'admin_panel_settings', path: '/admin/admins', superOnly: true },
   { name: 'คลังสินค้าและสินค้า', icon: 'inventory_2', path: '/admin/inventory' },
   { name: 'รายงานยอดขาย', icon: 'analytics', path: '/admin/sales' },
   { name: 'ร้านค้าและผลสำรวจ', icon: 'database', path: '/admin/stores' },
@@ -22,7 +23,7 @@ interface SidebarProps {
 export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen = false, onCloseMobile }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentAdmin, logout } = useAdminAuth();
+  const { currentAdmin, logout, isSuperAdmin } = useAdminAuth();
 
   React.useEffect(() => {
     onCloseMobile?.();
@@ -59,7 +60,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen = fa
       </div>
 
       <nav className="space-y-1.5 flex-1">
-        {navItems.map((item) => {
+        {navItems.filter((i) => !(i as any).superOnly || isSuperAdmin).map((item) => {
           const isActive = location.pathname === item.path || (item.path === '/admin' && location.pathname === '/admin/');
           return (
             <Link
